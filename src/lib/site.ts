@@ -6,7 +6,6 @@ export const site = {
   description:
     "Avasara Lab helps growing businesses turn operational challenges into practical AI solutions, intelligent automation, and actionable business insights.",
   url: process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000",
-  emailPlaceholder: "hello@avasaralab.com",
 } as const;
 
 export const nav = [

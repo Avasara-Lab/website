@@ -93,9 +93,12 @@ export function SiteFooter() {
             <div>
               <dt className="font-medium text-navy">Email</dt>
               <dd className="mt-1 text-muted">
-                {site.emailPlaceholder}
+                <Link className="hover:text-navy" href="/contact">
+                  Send an enquiry
+                </Link>
                 <span className="mt-1 block text-xs leading-5">
-                  Placeholder address. It is not a monitored inbox.
+                  Messages go through the contact form. A public inbox address
+                  is not listed here.
                 </span>
               </dd>
             </div>
@@ -114,7 +117,7 @@ export function SiteFooter() {
       <div className="border-t border-line">
         <div className="mx-auto flex w-full max-w-6xl flex-col gap-2 px-5 py-5 text-xs text-muted sm:flex-row sm:items-center sm:justify-between md:px-8">
           <p>© 2026 Avasara Lab</p>
-          <p>Project enquiries are prepared in the browser and are not sent.</p>
+          <p>Project enquiries are emailed through the contact form.</p>
         </div>
       </div>
     </footer>

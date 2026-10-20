@@ -1,12 +1,12 @@
 import { Suspense } from "react";
 import { EnquiryFormGate } from "@/components/enquiry-form";
 import { Eyebrow, Section, StatusNote } from "@/components/section";
-import { pageMetadata, site } from "@/lib/site";
+import { pageMetadata } from "@/lib/site";
 
 export const metadata = pageMetadata({
   title: "Contact",
   description:
-    "Prepare a project enquiry for Avasara Lab. The form validates in the browser. Email delivery is not configured, so submissions are not sent.",
+    "Send a project enquiry to Avasara Lab. The form checks the details, then emails them. A confirmation appears only after delivery is accepted.",
   path: "/contact",
 });
 
@@ -27,10 +27,9 @@ export default function ContactPage() {
           </p>
           <div className="mt-6">
             <StatusNote>
-              Email delivery is not configured. The form checks your details
-              and prepares a copy. It does not send the enquiry to {site.name}.
-              The published email {site.emailPlaceholder} is a placeholder and
-              is not monitored.
+              The form emails your enquiry to Avasara Lab. You will see a
+              confirmation only after the email service accepts it. If sending
+              fails, the details stay on the page so you can retry.
             </StatusNote>
           </div>
         </div>

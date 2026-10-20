@@ -1,8 +1,15 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { budgetOptions, helpOptions } from "@/lib/content";
+import {
+  deliveryMessages,
+  deliveryOutcome,
+  fieldLimits,
+  parseEnquiry,
+  type FieldErrors,
+} from "@/lib/enquiry";
 
 type Fields = {
   name: string;
@@ -13,7 +20,7 @@ type Fields = {
   budget: string;
 };
 
-type Errors = Partial<Record<keyof Fields, string>>;
+type Status = "idle" | "submitting" | "sent" | "failed";
 
 const empty: Fields = {
   name: "",
@@ -26,114 +33,87 @@ const empty: Fields = {
 
 const allowedHelp = new Set<string>(helpOptions.map((option) => option.value));
 
-function validate(fields: Fields): Errors {
-  const errors: Errors = {};
-  if (fields.name.trim().length < 2) {
-    errors.name = "Enter your name.";
-  }
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(fields.email.trim())) {
-    errors.email = "Enter a valid work email.";
-  }
-  if (fields.company.trim().length < 2) {
-    errors.company = "Enter your company name.";
-  }
-  if (fields.challenge.trim().length < 24) {
-    errors.challenge = "Describe the business challenge in at least a sentence.";
-  }
-  if (!allowedHelp.has(fields.help)) {
-    errors.help = "Select the type of help you need.";
-  }
-  return errors;
-}
-
-function labelFor(value: string, options: readonly { value: string; label: string }[]) {
-  return options.find((option) => option.value === value)?.label ?? "Not provided";
-}
-
 export function EnquiryForm({ initialHelp = "" }: { initialHelp?: string }) {
   const help = allowedHelp.has(initialHelp) ? initialHelp : "";
   const [fields, setFields] = useState<Fields>({ ...empty, help });
-  const [errors, setErrors] = useState<Errors>({});
-  const [submitted, setSubmitted] = useState<Fields | null>(null);
-  const [copied, setCopied] = useState(false);
-
-  const enquiryText = useMemo(() => {
-    if (!submitted) return "";
-    return [
-      "Avasara Lab project enquiry",
-      `Name: ${submitted.name.trim()}`,
-      `Work email: ${submitted.email.trim()}`,
-      `Company: ${submitted.company.trim()}`,
-      `Help needed: ${labelFor(submitted.help, helpOptions)}`,
-      `Approximate budget: ${
-        submitted.budget ? labelFor(submitted.budget, budgetOptions) : "Not provided"
-      }`,
-      "",
-      "Business challenge:",
-      submitted.challenge.trim(),
-      "",
-      "This enquiry was prepared in the browser and was not submitted to Avasara Lab.",
-    ].join("\n");
-  }, [submitted]);
+  const [companyWebsite, setCompanyWebsite] = useState("");
+  const [errors, setErrors] = useState<FieldErrors>({});
+  const [status, setStatus] = useState<Status>("idle");
+  const [failureMessage, setFailureMessage] = useState<string>(deliveryMessages.failed);
 
   function update<K extends keyof Fields>(key: K, value: Fields[K]) {
     setFields((current) => ({ ...current, [key]: value }));
     setErrors((current) => ({ ...current, [key]: undefined }));
+    if (status === "failed") setStatus("idle");
   }
 
-  function onSubmit(event: React.FormEvent<HTMLFormElement>) {
+  async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const nextErrors = validate(fields);
-    setErrors(nextErrors);
-    if (Object.keys(nextErrors).length > 0) {
-      setSubmitted(null);
+    if (status === "submitting") return;
+
+    const parsed = parseEnquiry({ ...fields, company_website: companyWebsite });
+    if (!parsed.ok && parsed.honeypot) {
+      setStatus("failed");
+      setFailureMessage(deliveryMessages.failed);
       return;
     }
-    setCopied(false);
-    setSubmitted(fields);
-  }
+    if (!parsed.ok) {
+      setErrors(parsed.fields);
+      setStatus("idle");
+      return;
+    }
 
-  async function copyEnquiry() {
+    setErrors({});
+    setStatus("submitting");
     try {
-      await navigator.clipboard.writeText(enquiryText);
-      setCopied(true);
+      const response = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ ...fields, company_website: companyWebsite }),
+      });
+      const body: unknown = await response.json().catch(() => null);
+      const outcome = deliveryOutcome(response.status, body);
+      if (outcome.type === "sent") {
+        setStatus("sent");
+        return;
+      }
+      if (outcome.type === "invalid") {
+        setErrors(outcome.fields);
+        setStatus("idle");
+        return;
+      }
+      setFailureMessage(outcome.message);
+      setStatus("failed");
     } catch {
-      setCopied(false);
+      setFailureMessage(deliveryMessages.network);
+      setStatus("failed");
     }
   }
 
-  if (submitted) {
+  if (status === "sent") {
     return (
       <div className="rounded-xl border border-line bg-white p-6 sm:p-8" role="status">
         <p className="text-xs font-semibold tracking-[0.14em] text-cyan uppercase">
-          Validated on this device
+          Delivered
         </p>
         <h2 className="mt-3 text-2xl font-semibold text-navy">
-          Your enquiry is ready to copy.
+          Your enquiry has been sent.
         </h2>
         <p className="mt-3 text-sm leading-6 text-muted">
-          Nothing was sent. This website has no email delivery or form backend,
-          so Avasara Lab does not receive this message.
+          The email service accepted the message for the Avasara Lab inbox.
+          Replies will use {fields.email.trim()}.
         </p>
-        <pre className="mt-6 overflow-x-auto rounded-lg bg-paper p-4 text-sm leading-6 whitespace-pre-wrap text-ink">
-          {enquiryText}
-        </pre>
-        <div className="mt-5 flex flex-wrap gap-3">
-          <button
-            type="button"
-            onClick={copyEnquiry}
-            className="inline-flex min-h-11 items-center rounded-md bg-navy px-4 text-sm font-semibold text-white hover:bg-navy-deep"
-          >
-            {copied ? "Copied" : "Copy enquiry"}
-          </button>
-          <button
-            type="button"
-            onClick={() => setSubmitted(null)}
-            className="inline-flex min-h-11 items-center rounded-md border border-line px-4 text-sm font-semibold text-navy hover:border-navy/30"
-          >
-            Edit details
-          </button>
-        </div>
+        <button
+          type="button"
+          onClick={() => {
+            setFields({ ...empty, help });
+            setCompanyWebsite("");
+            setStatus("idle");
+          }}
+          className="mt-6 inline-flex min-h-11 items-center rounded-md border border-line px-4 text-sm font-semibold text-navy hover:border-navy/30"
+        >
+          Send another enquiry
+        </button>
       </div>
     );
   }
@@ -144,8 +124,21 @@ export function EnquiryForm({ initialHelp = "" }: { initialHelp?: string }) {
     <form
       onSubmit={onSubmit}
       noValidate
-      className="rounded-xl border border-line bg-white p-6 sm:p-8"
+      aria-busy={status === "submitting"}
+      className="relative rounded-xl border border-line bg-white p-6 sm:p-8"
     >
+      <div className="pointer-events-none absolute -left-[10000px] h-px w-px overflow-hidden" aria-hidden="true">
+        <label htmlFor="company_website">Company website</label>
+        <input
+          id="company_website"
+          name="company_website"
+          type="text"
+          tabIndex={-1}
+          autoComplete="off"
+          value={companyWebsite}
+          onChange={(event) => setCompanyWebsite(event.target.value)}
+        />
+      </div>
       <div className="grid gap-5 sm:grid-cols-2">
         <Field
           id="name"
@@ -153,6 +146,7 @@ export function EnquiryForm({ initialHelp = "" }: { initialHelp?: string }) {
           value={fields.name}
           error={errors.name}
           autoComplete="name"
+          maxLength={fieldLimits.name}
           onChange={(value) => update("name", value)}
         />
         <Field
@@ -162,6 +156,7 @@ export function EnquiryForm({ initialHelp = "" }: { initialHelp?: string }) {
           value={fields.email}
           error={errors.email}
           autoComplete="email"
+          maxLength={fieldLimits.email}
           onChange={(value) => update("email", value)}
         />
         <Field
@@ -170,6 +165,7 @@ export function EnquiryForm({ initialHelp = "" }: { initialHelp?: string }) {
           value={fields.company}
           error={errors.company}
           autoComplete="organization"
+          maxLength={fieldLimits.company}
           onChange={(value) => update("company", value)}
         />
         <SelectField
@@ -191,6 +187,7 @@ export function EnquiryForm({ initialHelp = "" }: { initialHelp?: string }) {
           name="challenge"
           required
           rows={6}
+          maxLength={fieldLimits.challenge}
           value={fields.challenge}
           aria-invalid={errors.challenge ? true : undefined}
           aria-describedby={errors.challenge ? "challenge-error" : undefined}
@@ -218,15 +215,23 @@ export function EnquiryForm({ initialHelp = "" }: { initialHelp?: string }) {
           Check the highlighted fields before continuing.
         </p>
       ) : null}
+      {status === "failed" ? (
+        <p className="mt-5 text-sm text-[#8f1d34]" role="alert">
+          {failureMessage}
+        </p>
+      ) : null}
       <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center">
         <button
           type="submit"
-          className="inline-flex min-h-11 items-center justify-center rounded-md bg-navy px-4 text-sm font-semibold text-white hover:bg-navy-deep"
+          disabled={status === "submitting"}
+          className="inline-flex min-h-11 items-center justify-center rounded-md bg-navy px-4 text-sm font-semibold text-white hover:bg-navy-deep disabled:cursor-wait disabled:opacity-70"
         >
-          Prepare enquiry
+          {status === "submitting" ? "Sending enquiry" : "Send enquiry"}
         </button>
-        <p className="text-xs leading-5 text-muted">
-          Submitting checks the form in your browser. It does not send the enquiry.
+        <p className="text-xs leading-5 text-muted" aria-live="polite">
+          {status === "submitting"
+            ? "Sending. Please wait before trying again."
+            : "You will see a confirmation only after the email is accepted."}
         </p>
       </div>
     </form>
@@ -246,6 +251,7 @@ function Field({
   onChange,
   type = "text",
   autoComplete,
+  maxLength,
 }: {
   id: string;
   label: string;
@@ -254,6 +260,7 @@ function Field({
   onChange: (value: string) => void;
   type?: string;
   autoComplete?: string;
+  maxLength?: number;
 }) {
   return (
     <div>
@@ -266,6 +273,7 @@ function Field({
         type={type}
         value={value}
         required
+        maxLength={maxLength}
         autoComplete={autoComplete}
         aria-invalid={error ? true : undefined}
         aria-describedby={error ? `${id}-error` : undefined}

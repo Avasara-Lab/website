@@ -10,4 +10,4 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 ## Project notes
 
-This is the Avasara Lab marketing site. Do not invent clients, testimonials, metrics, or a live product. Feedback Intelligence is a synthetic demo. The contact form validates in the browser and does not send email.
+This is the Avasara Lab marketing site. Do not invent clients, testimonials, metrics, or a live product. Feedback Intelligence is a synthetic demo. The contact form posts to `/api/contact` and sends mail with Resend. Do not claim an enquiry was delivered unless the provider returns a message id. `RESEND_API_KEY`, `CONTACT_TO_EMAIL`, and `CONTACT_FROM_EMAIL` stay in the environment. The in-memory rate limiter is single-process only.
