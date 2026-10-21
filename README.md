@@ -32,7 +32,7 @@ npm run build
 
 Copy `.env.example` to `.env.local` and fill in the values. `.env.local` is gitignored. Never commit real credentials.
 
-Set `NEXT_PUBLIC_SITE_URL` to the public site origin, including the scheme, before production. Canonical URLs, the sitemap, robots, and social metadata use it. When the variable is unset, those URLs use `http://localhost:3000`.
+Set `NEXT_PUBLIC_SITE_URL` to the public site origin, including the scheme, before production. Canonical URLs, the sitemap, robots, and social metadata use it. When the variable is unset, those URLs use `https://avasaralab.com`.
 
 The contact form needs three server-only variables:
 
@@ -86,7 +86,41 @@ A delivered enquiry responds with `{"delivered":true}`. Resend’s dashboard sho
 
 ### Production
 
-Set `RESEND_API_KEY`, `CONTACT_TO_EMAIL`, `CONTACT_FROM_EMAIL`, and `NEXT_PUBLIC_SITE_URL` in the hosting provider’s environment. Redeploy after changing them. Confirm a real enquiry arrives in `CONTACT_TO_EMAIL` before announcing the form.
+This app needs a Node.js server at runtime. `POST /api/contact` is a Route Handler, so a static file upload is not enough.
+
+Hostinger Business web hosting can run it as a Node.js web app. Hostinger’s docs say Business plans include Node.js websites, run Next.js in server mode with API routes, and rebuild from GitHub on each push to the connected branch. Confirmed settings from those docs:
+
+| Setting | Value |
+| --- | --- |
+| Application type | `next` |
+| Node.js | 20 or newer (`engines` asks for `>=20`) |
+| Root directory | repository root |
+| Build command | `npm run build` |
+| Output directory | `.next` |
+| Entry file | ignored for Next.js |
+| Start script in this repo | `next start` (Hostinger starts the standalone server it adds during the build) |
+
+`next.config.ts` exports an object, which Hostinger can wrap with `output: "standalone"`. Do not change that export into a function.
+
+Deploy from GitHub only after the site is on `main`:
+
+1. In hPanel, open Websites → Add Website → Node.js web app → Import Git repository.
+2. Connect the Hostinger GitHub App to the account that can read `Avasara-Lab/website`.
+3. Select that repository and the `main` branch. Keep the root directory at the repository root.
+4. Confirm the framework is Next.js, the build script is `build`, and the output directory is `.next`.
+5. On the same screen, open Set environment variables and add the four names below. Add the Resend values only after the sending domain is verified. Save. Hostinger injects these into the build and the running server, then redeploys when they change.
+6. Deploy. Later pushes to `main` trigger another build. The deployment log is under Deployments.
+
+Do not remove the current `avasaralab.com` website to make room for this app until you have chosen to replace it. Hostinger’s “domain already added” flow can require changing the main domain and removing the existing website. That would replace whatever is live today. Connect the custom domain only after the Node.js app is running on Hostinger’s temporary domain and you have authorized the DNS change. If Cloudflare proxies the domain, set the SSL mode to Full after the records point at Hostinger.
+
+| Variable | Production value |
+| --- | --- |
+| `NEXT_PUBLIC_SITE_URL` | `https://avasaralab.com` |
+| `RESEND_API_KEY` | Resend API key, set in hPanel only |
+| `CONTACT_TO_EMAIL` | The one inbox that should receive enquiries |
+| `CONTACT_FROM_EMAIL` | A sender on a domain Resend has verified |
+
+`NEXT_PUBLIC_SITE_URL` is public and is also the code fallback. The other three stay server-side. Confirm a real enquiry arrives in `CONTACT_TO_EMAIL` before announcing the form. Email delivery is not confirmed until Resend accepts a real send.
 
 The endpoint also applies a process-local limit of 8 requests per 15 minutes per address in `x-forwarded-for`. That counter resets when the process restarts and is not shared across serverless instances, so it is not sufficient protection on its own for a multi-instance deploy. Replace the limiter in `src/app/api/contact/route.ts` with a `RateLimiter` from `src/lib/rate-limit.ts` backed by Redis or Upstash when that shared storage is available. The address is used only for that in-memory count.
 

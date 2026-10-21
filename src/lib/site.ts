@@ -5,7 +5,7 @@ export const site = {
   tagline: "Turn business signals into automation opportunities.",
   description:
     "Avasara Lab helps growing businesses turn operational challenges into practical AI solutions, intelligent automation, and actionable business insights.",
-  url: process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000",
+  url: process.env.NEXT_PUBLIC_SITE_URL ?? "https://avasaralab.com",
 } as const;
 
 export const nav = [
