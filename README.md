@@ -95,7 +95,7 @@ Hostinger Business web hosting can run it as a Node.js web app. Hostinger’s do
 | Application type | `next` |
 | Node.js | 20 or newer (`engines` asks for `>=20`) |
 | Root directory | repository root |
-| Build command | `npm run build` |
+| Build command | `npm run build`, which runs `next build --webpack` |
 | Output directory | `.next` |
 | Entry file | ignored for Next.js |
 | Start script in this repo | `next start` (Hostinger starts the standalone server it adds during the build) |
