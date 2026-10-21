@@ -4,8 +4,8 @@ import { useEffect, useState } from "react";
 import { signals } from "@/lib/content";
 
 const severityTone = {
-  High: "bg-[#fde8ea] text-[#8f1d34]",
-  Medium: "bg-[#fff4df] text-[#8a4b08]",
+  High: "bg-danger-soft text-danger",
+  Medium: "bg-orange-soft text-orange",
 } as const;
 
 export function SignalConsole() {
@@ -29,7 +29,7 @@ export function SignalConsole() {
 
   return (
     <div
-      className="overflow-hidden rounded-xl border border-line bg-white"
+      className="overflow-hidden rounded-xl border border-line bg-surface"
       onMouseEnter={() => setHoverPaused(true)}
       onMouseLeave={() => setHoverPaused(false)}
       onFocusCapture={() => setHoverPaused(true)}
@@ -117,18 +117,18 @@ export function SignalConsole() {
             <p className="mt-4 text-sm leading-6 text-muted">{signal.why}</p>
             <p className="mt-4 text-sm leading-6 text-ink">{signal.detail}</p>
           </div>
-          <div className="bg-navy px-4 py-5 text-white sm:px-5">
-            <p className="text-[11px] font-semibold tracking-[0.14em] text-white/60 uppercase">
+          <div className="bg-inverse px-4 py-5 text-on-inverse sm:px-5">
+            <p className="text-[11px] font-semibold tracking-[0.14em] text-on-inverse/60 uppercase">
               Recommended action
             </p>
-            <p className="mt-3 text-lg leading-7 font-medium text-white">
+            <p className="mt-3 text-lg leading-7 font-medium text-on-inverse">
               {signal.action}
             </p>
-            <div className="mt-6 border-t border-white/15 pt-4">
-              <p className="text-[11px] font-semibold tracking-[0.14em] text-cyan-soft uppercase">
+            <div className="mt-6 border-t border-on-inverse/15 pt-4">
+              <p className="text-[11px] font-semibold tracking-[0.14em] text-cyan uppercase">
                 Measure
               </p>
-              <p className="mt-2 text-sm leading-6 text-white/80">{signal.measure}</p>
+              <p className="mt-2 text-sm leading-6 text-on-inverse/80">{signal.measure}</p>
             </div>
           </div>
         </div>

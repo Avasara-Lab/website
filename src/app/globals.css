@@ -1,21 +1,90 @@
 @import "tailwindcss";
 
 :root {
-  --paper: #f3eee6;
-  --ink: #1c1714;
-  --navy: #17332e;
-  --navy-deep: #0d221e;
-  --muted: #5e564e;
-  --line: #e4dcd0;
-  --cyan: #b24a28;
-  --cyan-soft: #f6e6de;
-  --violet: #3e514b;
-  --background: #fbf7f2;
-  --foreground: #1c1714;
+  --background: #ffffff;
+  --paper: #f7f8fa;
+  --surface: #ffffff;
+  --mist: #f0f2f5;
+  --ink: #111318;
+  --navy: #111318;
+  --navy-deep: #000000;
+  --muted: #5f6673;
+  --line: #e5e7eb;
+  --cyan: #2563eb;
+  --cyan-soft: #eff6ff;
+  --orange: #f97316;
+  --orange-soft: #fff7ed;
+  --btn: #111318;
+  --btn-hover: #000000;
+  --on-btn: #ffffff;
+  --inverse: #111318;
+  --on-inverse: #f5f7fa;
+  --ink-fixed: #111318;
+  --danger: #9f1239;
+  --danger-soft: #fff1f2;
+  --violet: #5f6673;
+  --foreground: #111318;
+  color-scheme: light;
+}
+
+html[data-theme="dark"] {
+  --background: #0b0d10;
+  --paper: #11151b;
+  --surface: #181d25;
+  --mist: #11151b;
+  --ink: #f5f7fa;
+  --navy: #f5f7fa;
+  --navy-deep: #ffffff;
+  --muted: #a4acb9;
+  --line: #272d36;
+  --cyan: #60a5fa;
+  --cyan-soft: #17243a;
+  --orange: #fb923c;
+  --orange-soft: #302014;
+  --btn: #f5f7fa;
+  --btn-hover: #ffffff;
+  --on-btn: #111318;
+  --inverse: #181d25;
+  --on-inverse: #f5f7fa;
+  --danger: #fda4af;
+  --danger-soft: #3a1d24;
+  --violet: #a4acb9;
+  --foreground: #f5f7fa;
+  color-scheme: dark;
+}
+
+@media (prefers-color-scheme: dark) {
+  html:not([data-theme="light"]) {
+    --background: #0b0d10;
+    --paper: #11151b;
+    --surface: #181d25;
+    --mist: #11151b;
+    --ink: #f5f7fa;
+    --navy: #f5f7fa;
+    --navy-deep: #ffffff;
+    --muted: #a4acb9;
+    --line: #272d36;
+    --cyan: #60a5fa;
+    --cyan-soft: #17243a;
+    --orange: #fb923c;
+    --orange-soft: #302014;
+    --btn: #f5f7fa;
+    --btn-hover: #ffffff;
+    --on-btn: #111318;
+    --inverse: #181d25;
+    --on-inverse: #f5f7fa;
+    --danger: #fda4af;
+    --danger-soft: #3a1d24;
+    --violet: #a4acb9;
+    --foreground: #f5f7fa;
+    color-scheme: dark;
+  }
 }
 
 @theme inline {
   --color-paper: var(--paper);
+  --color-surface: var(--surface);
+  --color-mist: var(--mist);
   --color-ink: var(--ink);
   --color-navy: var(--navy);
   --color-navy-deep: var(--navy-deep);
@@ -23,24 +92,33 @@
   --color-line: var(--line);
   --color-cyan: var(--cyan);
   --color-cyan-soft: var(--cyan-soft);
+  --color-orange: var(--orange);
+  --color-orange-soft: var(--orange-soft);
+  --color-btn: var(--btn);
+  --color-btn-hover: var(--btn-hover);
+  --color-on-btn: var(--on-btn);
+  --color-inverse: var(--inverse);
+  --color-on-inverse: var(--on-inverse);
+  --color-ink-fixed: var(--ink-fixed);
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
   --color-violet: var(--violet);
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --color-white: #fffdf9;
-  --font-sans: var(--font-source);
-  --font-display: var(--font-outfit);
+  --color-white: var(--background);
+  --font-sans: var(--font-inter), Inter, sans-serif;
+  --font-display: var(--font-inter), Inter, sans-serif;
   --font-mono: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
 }
 
 html {
   scroll-behavior: smooth;
-  color-scheme: light;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-source), sans-serif;
+  font-family: var(--font-inter), Inter, sans-serif;
   text-rendering: optimizeLegibility;
 }
 
@@ -48,14 +126,13 @@ h1,
 h2,
 h3,
 h4 {
-  font-family: var(--font-outfit), Georgia, serif;
-  letter-spacing: -0.035em;
-  font-optical-sizing: auto;
+  font-family: var(--font-inter), Inter, sans-serif;
+  letter-spacing: -0.03em;
 }
 
 ::selection {
-  background: #f0d2c4;
-  color: #1c1714;
+  background: var(--cyan-soft);
+  color: var(--ink);
 }
 
 :focus-visible {
@@ -65,19 +142,27 @@ h4 {
 
 .panel {
   border: 1px solid var(--line);
-  background: #fffdf9;
-  box-shadow: 0 1px 0 rgb(28 23 20 / 0.03);
+  background: var(--surface);
+  box-shadow: 0 1px 0 color-mix(in srgb, var(--ink) 4%, transparent);
 }
 
 .panel-hover {
   transition:
     border-color 180ms ease,
+    background-color 180ms ease,
     transform 180ms ease;
 }
 
 @media (prefers-reduced-motion: no-preference) {
+  html.theme-ready :where(body, header, footer, section, article, button, a, input, textarea, select) {
+    transition:
+      background-color 180ms ease,
+      border-color 180ms ease,
+      color 180ms ease;
+  }
+
   .panel-hover:hover {
-    border-color: #c9b8a4;
+    border-color: color-mix(in srgb, var(--cyan) 45%, var(--line));
     transform: translateY(-2px);
   }
 }

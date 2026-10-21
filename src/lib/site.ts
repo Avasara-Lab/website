@@ -5,7 +5,7 @@ export const site = {
   name: "Avasara Lab",
   tagline: "Turn business signals into automation opportunities.",
   description:
-    "Avasara Lab helps businesses uncover opportunities, build intelligent AI solutions, automate workflows, and turn ideas into measurable business outcomes.",
+    "We help ambitious businesses turn operational challenges, customer signals, and disconnected workflows into intelligent software, AI-powered automation, and measurable business improvements.",
   url: resolveSiteUrl(process.env.NEXT_PUBLIC_SITE_URL),
 } as const;
 

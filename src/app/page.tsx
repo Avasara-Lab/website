@@ -4,14 +4,14 @@ import { DemoStage } from "@/components/demo-stage";
 import { HeroFlow } from "@/components/hero-flow";
 import { Reveal } from "@/components/reveal";
 import { ButtonLink } from "@/components/button-link";
+import { ServiceIcon } from "@/components/service-icon";
 import { Eyebrow } from "@/components/section";
 import { serviceCategories } from "@/lib/services-catalog";
-import { pageMetadata } from "@/lib/site";
+import { pageMetadata, site } from "@/lib/site";
 
 export const metadata = pageMetadata({
-  title: "Turn business complexity into intelligent opportunities",
-  description:
-    "Avasara Lab helps businesses uncover opportunities, build intelligent AI solutions, automate workflows, and turn ideas into measurable business outcomes.",
+  title: "Find the opportunity. Build the intelligence. Automate the outcome.",
+  description: site.description,
   path: "/",
 });
 
@@ -51,25 +51,31 @@ export default function HomePage() {
   return (
     <>
       <section className="border-b border-line">
-        <div className="mx-auto grid w-full max-w-6xl gap-12 px-5 py-16 md:px-8 md:py-24 lg:grid-cols-12 lg:items-center">
-          <div className="lg:col-span-5">
-            <Eyebrow>AI engineering · Intelligent automation · Product development</Eyebrow>
-            <h1 className="text-4xl leading-[1.05] font-medium text-balance text-navy sm:text-6xl">
-              Turn business complexity into intelligent opportunities.
-            </h1>
-            <p className="mt-5 max-w-xl text-base leading-7 text-muted">
-              Avasara Lab helps businesses uncover opportunities, build intelligent AI solutions, automate workflows, and turn ideas into measurable business outcomes.
-            </p>
-            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-              <ButtonLink href="/services" arrow>
-                Explore Our Services
-              </ButtonLink>
-              <ButtonLink href="/contact" variant="secondary">
-                Let&apos;s Talk
-              </ButtonLink>
+        <div className="mx-auto w-full max-w-6xl px-5 py-16 md:px-8 md:py-24">
+          <div className="grid items-end gap-8 lg:grid-cols-12">
+            <div className="lg:col-span-7">
+              <Eyebrow>AI engineering · Intelligent automation</Eyebrow>
+              <h1 className="text-4xl leading-[1.05] font-semibold text-navy sm:text-5xl lg:text-6xl">
+                Find the opportunity.
+                <br />
+                Build the intelligence.
+                <br />
+                Automate the outcome.
+              </h1>
+            </div>
+            <div className="lg:col-span-5">
+              <p className="text-base leading-7 text-muted">{site.description}</p>
+              <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+                <ButtonLink href="/contact" arrow>
+                  Discuss Your Project
+                </ButtonLink>
+                <ButtonLink href="/services" variant="secondary">
+                  Explore Our Services
+                </ButtonLink>
+              </div>
             </div>
           </div>
-          <div className="lg:col-span-7">
+          <div className="mt-12">
             <HeroFlow />
           </div>
         </div>
@@ -86,7 +92,7 @@ export default function HomePage() {
           <div className="mt-10 grid gap-4 md:grid-cols-3">
             {capabilities.map((item, index) => (
               <Reveal key={item.title} delay={index * 80}>
-                <article className="panel panel-hover h-full rounded-3xl p-6">
+                <article className="panel panel-hover h-full rounded-xl p-6">
                   <p className="font-mono text-xs text-cyan">0{index + 1}</p>
                   <h3 className="mt-3 font-display text-3xl text-navy">{item.title}</h3>
                   <p className="mt-3 text-sm leading-6 text-muted">{item.text}</p>
@@ -110,8 +116,9 @@ export default function HomePage() {
           </div>
           <div className="mt-10 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {serviceCategories.map((category) => (
-              <a key={category.id} href={`/services#${category.id}`} className="panel panel-hover rounded-3xl p-6">
-                <h3 className="font-display text-2xl text-navy">{category.title}</h3>
+              <a key={category.id} href={`/services#${category.id}`} className="panel panel-hover rounded-xl p-6">
+                <ServiceIcon id={category.id} />
+                <h3 className="mt-4 text-xl font-semibold text-navy">{category.title}</h3>
                 <p className="mt-3 text-sm leading-6 text-muted">{category.summary}</p>
               </a>
             ))}
@@ -132,16 +139,16 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section id="how-we-work" className="scroll-mt-24 bg-navy text-white">
+      <section id="how-we-work" className="scroll-mt-24 bg-inverse text-on-inverse">
         <div className="mx-auto w-full max-w-6xl px-5 py-16 md:px-8 md:py-24">
-          <p className="text-xs font-semibold tracking-[0.16em] text-cyan-soft uppercase">Our approach</p>
-          <h2 className="mt-3 max-w-2xl font-display text-4xl font-medium sm:text-5xl">Discover, analyze, design, build, optimize.</h2>
+          <p className="text-xs font-semibold tracking-[0.16em] text-cyan uppercase">Our approach</p>
+          <h2 className="mt-3 max-w-2xl text-4xl font-semibold sm:text-5xl">Discover, analyze, design, build, optimize.</h2>
           <ol className="mt-10 grid gap-4 md:grid-cols-5">
             {steps.map((step, index) => (
-              <li key={step.name} className="rounded-3xl border border-white/15 bg-white/5 p-4">
-                <span className="font-mono text-xs text-cyan-soft">0{index + 1}</span>
-                <h3 className="mt-3 font-display text-2xl">{step.name}</h3>
-                <p className="mt-2 text-sm leading-6 text-white/75">{step.text}</p>
+              <li key={step.name} className="rounded-xl border border-on-inverse/15 bg-on-inverse/5 p-4">
+                <span className="font-mono text-xs text-cyan">0{index + 1}</span>
+                <h3 className="mt-3 text-2xl font-semibold">{step.name}</h3>
+                <p className="mt-2 text-sm leading-6 text-on-inverse/75">{step.text}</p>
               </li>
             ))}
           </ol>
@@ -154,7 +161,7 @@ export default function HomePage() {
           <h2 className="max-w-2xl text-4xl font-medium text-navy sm:text-5xl">Where the same patterns show up.</h2>
           <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {industries.map((industry) => (
-              <article key={industry.name} className="rounded-3xl border border-line p-5">
+              <article key={industry.name} className="rounded-xl border border-line bg-surface p-5">
                 <h3 className="font-display text-2xl text-navy">{industry.name}</h3>
                 <p className="mt-2 text-sm leading-6 text-muted">{industry.text}</p>
               </article>

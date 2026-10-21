@@ -1,21 +1,18 @@
 import type { Metadata } from "next";
-import { Fraunces, Manrope } from "next/font/google";
+import { Inter } from "next/font/google";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { site } from "@/lib/site";
 import "./globals.css";
 
-const outfit = Fraunces({
+const inter = Inter({
   subsets: ["latin"],
-  variable: "--font-outfit",
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-inter",
   display: "swap",
 });
 
-const sourceSans = Manrope({
-  subsets: ["latin"],
-  variable: "--font-source",
-  display: "swap",
-});
+const themeBoot = `(function(){try{var stored=localStorage.getItem("avasara-theme");var theme=stored==="light"||stored==="dark"||stored==="system"?stored:"system";var dark=theme==="dark"||(theme!=="light"&&window.matchMedia("(prefers-color-scheme: dark)").matches);document.documentElement.dataset.theme=dark?"dark":"light";document.documentElement.dataset.themeChoice=theme;}catch(e){document.documentElement.dataset.theme="light";document.documentElement.dataset.themeChoice="system";}document.documentElement.classList.add("js","theme-ready");})();`;
 
 export const metadata: Metadata = {
   metadataBase: new URL(site.url),
@@ -49,22 +46,17 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   };
 
   return (
-    <html
-      lang="en"
-      className={`${outfit.variable} ${sourceSans.variable} h-full antialiased`}
-    >
+    <html lang="en" suppressHydrationWarning className={`${inter.variable} h-full antialiased`}>
+      <head>
+        <script id="theme-boot" dangerouslySetInnerHTML={{ __html: themeBoot }} />
+      </head>
       <body className="flex min-h-full flex-col">
         <a
           href="#content"
-          className="sr-only focus:not-sr-only focus:absolute focus:top-3 focus:left-3 focus:z-50 focus:rounded-md focus:bg-navy focus:px-4 focus:py-2 focus:text-sm focus:text-white"
+          className="sr-only focus:not-sr-only focus:absolute focus:top-3 focus:left-3 focus:z-50 focus:rounded-lg focus:bg-btn focus:px-4 focus:py-2 focus:text-sm focus:text-on-btn"
         >
           Skip to content
         </a>
-        <script
-          dangerouslySetInnerHTML={{
-            __html: "document.documentElement.classList.add('js')",
-          }}
-        />
         <SiteHeader />
         <main id="content" className="flex-1">
           {children}

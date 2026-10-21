@@ -92,7 +92,7 @@ export function EnquiryForm({ initialHelp = "" }: { initialHelp?: string }) {
 
   if (status === "sent") {
     return (
-      <div className="rounded-xl border border-line bg-white p-6 sm:p-8" role="status">
+      <div className="rounded-xl border border-line bg-surface p-6 sm:p-8" role="status">
         <p className="text-xs font-semibold tracking-[0.14em] text-cyan uppercase">
           Delivered
         </p>
@@ -125,7 +125,7 @@ export function EnquiryForm({ initialHelp = "" }: { initialHelp?: string }) {
       onSubmit={onSubmit}
       noValidate
       aria-busy={status === "submitting"}
-      className="relative rounded-xl border border-line bg-white p-6 sm:p-8"
+      className="relative rounded-xl border border-line bg-surface p-6 sm:p-8"
     >
       <div className="pointer-events-none absolute -left-[10000px] h-px w-px overflow-hidden" aria-hidden="true">
         <label htmlFor="company_website">Company website</label>
@@ -192,10 +192,10 @@ export function EnquiryForm({ initialHelp = "" }: { initialHelp?: string }) {
           aria-invalid={errors.challenge ? true : undefined}
           aria-describedby={errors.challenge ? "challenge-error" : undefined}
           onChange={(event) => update("challenge", event.target.value)}
-          className="mt-2 w-full rounded-md border border-line bg-white px-3 py-3 text-sm leading-6 text-ink outline-none focus:border-navy"
+          className="mt-2 w-full rounded-lg border border-line bg-background px-3 py-3 text-sm leading-6 text-ink outline-none focus:border-cyan"
         />
         {errors.challenge ? (
-          <p id="challenge-error" className="mt-2 text-sm text-[#8f1d34]">
+          <p id="challenge-error" className="mt-2 text-sm text-danger">
             {errors.challenge}
           </p>
         ) : null}
@@ -211,12 +211,12 @@ export function EnquiryForm({ initialHelp = "" }: { initialHelp?: string }) {
         />
       </div>
       {errorCount > 0 ? (
-        <p className="mt-5 text-sm text-[#8f1d34]" role="alert">
+        <p className="mt-5 text-sm text-danger" role="alert">
           Check the highlighted fields before continuing.
         </p>
       ) : null}
       {status === "failed" ? (
-        <p className="mt-5 text-sm text-[#8f1d34]" role="alert">
+        <p className="mt-5 text-sm text-danger" role="alert">
           {failureMessage}
         </p>
       ) : null}
@@ -224,7 +224,7 @@ export function EnquiryForm({ initialHelp = "" }: { initialHelp?: string }) {
         <button
           type="submit"
           disabled={status === "submitting"}
-          className="inline-flex min-h-11 items-center justify-center rounded-md bg-navy px-4 text-sm font-semibold text-white hover:bg-navy-deep disabled:cursor-wait disabled:opacity-70"
+          className="inline-flex min-h-11 items-center justify-center rounded-lg bg-btn px-4 text-sm font-semibold text-on-btn hover:bg-btn-hover disabled:cursor-wait disabled:opacity-70"
         >
           {status === "submitting" ? "Sending enquiry" : "Send enquiry"}
         </button>
@@ -278,10 +278,10 @@ function Field({
         aria-invalid={error ? true : undefined}
         aria-describedby={error ? `${id}-error` : undefined}
         onChange={(event) => onChange(event.target.value)}
-        className="mt-2 h-11 w-full rounded-md border border-line bg-white px-3 text-sm text-ink outline-none focus:border-navy"
+        className="mt-2 h-11 w-full rounded-lg border border-line bg-background px-3 text-sm text-ink outline-none focus:border-cyan"
       />
       {error ? (
-        <p id={`${id}-error`} className="mt-2 text-sm text-[#8f1d34]">
+        <p id={`${id}-error`} className="mt-2 text-sm text-danger">
           {error}
         </p>
       ) : null}
@@ -318,7 +318,7 @@ function SelectField({
         aria-invalid={error ? true : undefined}
         aria-describedby={error ? `${id}-error` : undefined}
         onChange={(event) => onChange(event.target.value)}
-        className="mt-2 h-11 w-full rounded-md border border-line bg-white px-3 text-sm text-ink outline-none focus:border-navy"
+        className="mt-2 h-11 w-full rounded-lg border border-line bg-background px-3 text-sm text-ink outline-none focus:border-cyan"
       >
         <option value="">{placeholder}</option>
         {options.map((option) => (
@@ -328,7 +328,7 @@ function SelectField({
         ))}
       </select>
       {error ? (
-        <p id={`${id}-error`} className="mt-2 text-sm text-[#8f1d34]">
+        <p id={`${id}-error`} className="mt-2 text-sm text-danger">
           {error}
         </p>
       ) : null}

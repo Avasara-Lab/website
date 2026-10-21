@@ -47,8 +47,8 @@ export function DemoStage() {
               aria-selected={selected}
               aria-controls={`panel-${demo.id}`}
               onClick={() => setActive(demo.id)}
-              className={`shrink-0 rounded-full border px-4 py-2 text-sm font-semibold transition-colors ${
-                selected ? "border-navy bg-navy text-white" : "border-line bg-white text-navy hover:border-navy/40"
+              className={`shrink-0 rounded-lg border px-4 py-2 text-sm font-semibold transition-colors ${
+                selected ? "border-btn bg-btn text-on-btn" : "border-line bg-surface text-navy hover:border-cyan/40"
               }`}
             >
               {demo.label}
@@ -60,7 +60,7 @@ export function DemoStage() {
         role="tabpanel"
         id={`panel-${current.id}`}
         aria-labelledby={`tab-${current.id}`}
-        className="panel mt-4 rounded-3xl p-5 sm:p-7"
+        className="panel mt-4 rounded-xl p-5 sm:p-7"
       >
         <p className="text-xs font-semibold tracking-[0.14em] text-cyan uppercase">Illustrative · synthetic data</p>
         <h3 className="mt-2 font-display text-3xl text-navy">{current.kicker}</h3>
@@ -86,7 +86,7 @@ function OpportunityDemo() {
   return (
     <dl className="grid gap-3 sm:grid-cols-2">
       {rows.map(([term, detail]) => (
-        <div key={term} className="rounded-2xl border border-line px-4 py-3">
+        <div key={term} className="rounded-lg border border-line px-4 py-3">
           <dt className="text-xs font-semibold tracking-[0.12em] text-muted uppercase">{term}</dt>
           <dd className="mt-1 text-sm leading-6 text-ink">{detail}</dd>
         </div>
@@ -119,7 +119,7 @@ function WorkflowDemo() {
   return (
     <ol className="grid gap-3 md:grid-cols-4">
       {steps.map((step, index) => (
-        <li key={step} className="rounded-2xl bg-paper px-3 py-4">
+        <li key={step} className="rounded-lg bg-paper px-3 py-4">
           <span className="font-mono text-xs text-cyan">0{index + 1}</span>
           <p className="mt-2 text-sm leading-5 text-navy">{step}</p>
         </li>
@@ -144,7 +144,7 @@ function DashboardDemo() {
             <span>{width} sample notes</span>
           </div>
           <div className="mt-1 h-2 rounded-full bg-paper">
-            <div className="h-2 rounded-full bg-navy" style={{ width: `${width}%` }} />
+            <div className={`h-2 rounded-full ${label === "Billing" ? "bg-orange" : "bg-cyan"}`} style={{ width: `${width}%` }} />
           </div>
         </div>
       ))}

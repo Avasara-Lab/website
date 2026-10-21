@@ -4,8 +4,8 @@ import { useMemo, useState } from "react";
 import { feedbackItems, feedbackThemes } from "@/lib/content";
 
 const severityTone = {
-  High: "bg-[#fde8ea] text-[#8f1d34]",
-  Medium: "bg-[#fff4df] text-[#8a4b08]",
+  High: "bg-danger-soft text-danger",
+  Medium: "bg-orange-soft text-orange",
   Low: "bg-cyan-soft text-cyan",
 } as const;
 
@@ -30,7 +30,7 @@ export function FeedbackDemo() {
     }));
 
   return (
-    <div className="overflow-hidden rounded-xl border border-line bg-white">
+    <div className="overflow-hidden rounded-xl border border-line bg-surface">
       <div className="flex flex-wrap items-end justify-between gap-4 border-b border-line px-4 py-4 sm:px-5">
         <div>
           <p className="text-sm font-semibold text-navy">Sample reading</p>
@@ -70,7 +70,7 @@ export function FeedbackDemo() {
               }}
               className={`shrink-0 rounded-full px-3 py-1.5 text-sm font-medium ${
                 active
-                  ? "bg-navy text-white"
+                  ? "bg-btn text-on-btn"
                   : "bg-paper text-navy hover:bg-line"
               }`}
             >

@@ -1,47 +1,101 @@
 const stages = [
-  { label: "Business signals", detail: "Tickets, reviews, CRM notes" },
-  { label: "AI intelligence", detail: "Themes, entities, exceptions" },
-  { label: "Opportunities", detail: "Where the work can change" },
-  { label: "Solutions", detail: "Agents, software, workflows" },
-  { label: "Business impact", detail: "Time, quality, follow-through" },
-];
+  { label: "Business Signals", detail: "Tickets, reviews, and handoffs", tone: "neutral" },
+  { label: "AI Analysis", detail: "Themes, entities, exceptions", tone: "analysis" },
+  { label: "Problems Identified", detail: "Where the work breaks", tone: "analysis" },
+  { label: "Automation Opportunities", detail: "The step worth changing", tone: "opportunity" },
+  { label: "Recommended Solutions", detail: "Agents, software, workflows", tone: "neutral" },
+  { label: "Implementation", detail: "Built with the team that uses it", tone: "neutral" },
+  { label: "Measured Business Impact", detail: "Time, quality, follow-through", tone: "opportunity" },
+] as const;
+
+const toneClass = {
+  neutral: "border-line bg-surface",
+  analysis: "border-cyan/30 bg-cyan-soft",
+  opportunity: "border-orange/40 bg-orange-soft",
+} as const;
+
+const markerClass = {
+  neutral: "border-line text-muted",
+  analysis: "border-cyan text-cyan",
+  opportunity: "border-orange text-orange",
+} as const;
 
 export function HeroFlow() {
   return (
-    <figure className="panel relative overflow-hidden rounded-3xl p-5 sm:p-7" aria-label="Illustrative path from business signals to impact">
-      <figcaption className="flex items-center justify-between gap-3 text-xs font-semibold tracking-[0.14em] text-muted uppercase">
-        <span>Illustrative system</span>
-        <span className="text-cyan">Synthetic</span>
+    <figure
+      className="panel relative overflow-hidden rounded-xl p-4 sm:p-6"
+      aria-labelledby="opportunity-flow-title"
+    >
+      <figcaption className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <p id="opportunity-flow-title" className="text-sm font-semibold text-navy">
+            Opportunity Intelligence
+          </p>
+          <p className="mt-1 max-w-xl text-xs leading-5 text-muted">
+            Strategic direction. This path shows how an engagement is framed. It is not a product you can log into, and the notes below are synthetic.
+          </p>
+        </div>
+        <p className="rounded-md bg-paper px-2 py-1 text-[11px] font-semibold tracking-[0.12em] text-muted uppercase">
+          Illustrative
+        </p>
       </figcaption>
-      <svg viewBox="0 0 640 86" className="mt-4 hidden h-16 w-full md:block" aria-hidden="true">
-        <path d="M36 43 H604" stroke="#e4dcd0" strokeWidth="2" />
-        <path className="flow-dash" d="M36 43 H604" stroke="#b24a28" strokeWidth="2" fill="none" />
-        {stages.map((_, index) => (
-          <circle key={index} cx={36 + index * 142} cy="43" r="7" fill="#fffdf9" stroke="#17332e" strokeWidth="2" />
-        ))}
-      </svg>
-      <ol className="mt-2 grid gap-3 md:grid-cols-5">
+
+      <ol className="relative mt-6 grid gap-3 xl:grid-cols-7">
+        <span className="absolute top-2 bottom-2 left-[11px] w-px bg-line xl:hidden" aria-hidden="true" />
+        <svg
+          className="pointer-events-none absolute top-6 right-4 left-4 hidden h-px w-[calc(100%-2rem)] xl:block"
+          viewBox="0 0 1000 2"
+          preserveAspectRatio="none"
+          aria-hidden="true"
+        >
+          <path d="M0 1 H1000" stroke="var(--line)" strokeWidth="2" vectorEffect="non-scaling-stroke" />
+          <path
+            className="flow-dash"
+            d="M0 1 H1000"
+            stroke="var(--cyan)"
+            strokeWidth="2"
+            fill="none"
+            vectorEffect="non-scaling-stroke"
+          />
+        </svg>
         {stages.map((stage, index) => (
-          <li key={stage.label} className="rounded-2xl border border-line bg-paper/70 px-3 py-3">
-            <p className="font-mono text-[11px] text-cyan">0{index + 1}</p>
-            <p className="mt-1 font-display text-lg leading-tight text-navy">{stage.label}</p>
-            <p className="mt-1 text-xs leading-5 text-muted">{stage.detail}</p>
+          <li key={stage.label} className="relative z-10 flex gap-3 xl:block">
+            <span
+              className={`grid size-6 shrink-0 place-items-center rounded-full border bg-background font-mono text-[10px] xl:mb-3 ${markerClass[stage.tone]}`}
+            >
+              {index + 1}
+            </span>
+            <div className={`min-w-0 flex-1 rounded-lg border px-3 py-3 ${toneClass[stage.tone]}`}>
+              <p className="text-sm leading-5 font-semibold text-navy">{stage.label}</p>
+              <p className="mt-1 text-xs leading-5 text-muted">{stage.detail}</p>
+            </div>
           </li>
         ))}
       </ol>
-      <div className="mt-4 grid gap-3 sm:grid-cols-3">
-        <Insight title="Signal" body="Plan-change tickets mention invoice timing." />
-        <Insight title="Opportunity" body="Show the next invoice date at the moment of change." />
-        <Insight title="Next step" body="Standard reply now. Product change if repeats continue." />
+
+      <div className="mt-5 grid gap-3 border-t border-line pt-5 sm:grid-cols-3">
+        <Signal label="Signal" tone="analysis" body="Plan-change tickets mention invoice timing." />
+        <Signal label="Opportunity" tone="opportunity" body="Show the next invoice date at the moment of change." />
+        <Signal label="Impact to test" tone="neutral" body="Repeat contacts about the same invoice within seven days." />
       </div>
     </figure>
   );
 }
 
-function Insight({ title, body }: { title: string; body: string }) {
+function Signal({
+  label,
+  body,
+  tone,
+}: {
+  label: string;
+  body: string;
+  tone: keyof typeof markerClass;
+}) {
   return (
-    <div className="rounded-2xl border border-line px-3 py-3">
-      <p className="text-[11px] font-semibold tracking-[0.14em] text-cyan uppercase">{title}</p>
+    <div className="rounded-lg border border-line bg-background px-3 py-3">
+      <p className={`text-[11px] font-semibold tracking-[0.14em] uppercase ${tone === "opportunity" ? "text-orange" : "text-cyan"}`}>
+        {label}
+      </p>
       <p className="mt-1 text-sm leading-5 text-ink">{body}</p>
     </div>
   );

@@ -28,7 +28,7 @@ export default function AboutPage() {
       <Section tone="paper">
         <div className="grid gap-4 md:grid-cols-3">
           {beliefs.map((item) => (
-            <article key={item.title} className="panel rounded-3xl p-6">
+            <article key={item.title} className="panel rounded-xl p-6">
               <h2 className="font-display text-3xl text-navy">{item.title}</h2>
               <p className="mt-3 text-sm leading-6 text-muted">{item.text}</p>
             </article>

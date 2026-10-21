@@ -24,7 +24,7 @@ export default function ProductsPage() {
       </Section>
       <Section tone="paper">
         <div className="grid gap-4 lg:grid-cols-2">
-          <article className="panel rounded-3xl p-7">
+          <article className="panel rounded-xl p-7">
             <p className="text-xs font-semibold tracking-[0.14em] text-cyan uppercase">Early direction</p>
             <h2 className="mt-3 font-display text-4xl text-navy">Feedback Intelligence</h2>
             <p className="mt-4 text-sm leading-6 text-muted">
@@ -36,10 +36,10 @@ export default function ProductsPage() {
               </ButtonLink>
             </div>
           </article>
-          <article className="rounded-3xl border border-line bg-navy p-7 text-white">
-            <p className="text-xs font-semibold tracking-[0.14em] text-cyan-soft uppercase">Longer-term vision</p>
-            <h2 className="mt-3 font-display text-4xl">Opportunity Intelligence</h2>
-            <p className="mt-4 text-sm leading-6 text-white/75">
+          <article className="rounded-xl border border-line bg-inverse p-7 text-on-inverse">
+            <p className="text-xs font-semibold tracking-[0.14em] text-orange uppercase">Longer-term vision</p>
+            <h2 className="mt-3 text-4xl font-semibold">Opportunity Intelligence</h2>
+            <p className="mt-4 text-sm leading-6 text-on-inverse/75">
               The longer aim is a system that connects signals, opportunities, and the workflow that follows. Today that work happens as a scoped engagement, not as a product you can log into.
             </p>
           </article>

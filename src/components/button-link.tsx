@@ -2,13 +2,10 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 
 const variants = {
-  primary:
-    "bg-navy text-white hover:bg-navy-deep border border-navy",
-  secondary:
-    "bg-white text-navy border border-line hover:border-navy/40",
-  inverse:
-    "bg-white text-navy border border-white hover:bg-paper",
-  ghost: "bg-transparent text-white border border-white/30 hover:border-white",
+  primary: "bg-btn text-on-btn hover:bg-btn-hover border border-btn",
+  secondary: "bg-surface text-navy border border-line hover:border-cyan/50",
+  inverse: "bg-on-inverse text-ink-fixed border border-on-inverse hover:opacity-90",
+  ghost: "bg-transparent text-on-inverse border border-on-inverse/30 hover:border-on-inverse",
 } as const;
 
 export function ButtonLink({
@@ -25,7 +22,7 @@ export function ButtonLink({
   return (
     <Link
       href={href}
-      className={`inline-flex min-h-11 items-center justify-center gap-2 rounded-full px-5 text-sm font-semibold transition-colors ${variants[variant]}`}
+      className={`inline-flex min-h-11 items-center justify-center gap-2 rounded-lg px-5 text-sm font-semibold transition-colors ${variants[variant]}`}
     >
       {children}
       {arrow ? <ArrowRight className="size-4" aria-hidden="true" /> : null}

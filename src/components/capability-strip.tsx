@@ -1,11 +1,10 @@
 const items = [
   "AI Agents",
-  "Generative AI",
-  "Intelligent Automation",
-  "Data Intelligence",
-  "SaaS Engineering",
-  "AI Strategy",
-  "Product Development",
+  "Knowledge Systems",
+  "Data Engineering",
+  "Product Engineering",
+  "AI Infrastructure",
+  "Opportunity Intelligence",
 ];
 
 export function CapabilityStrip() {

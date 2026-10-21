@@ -12,7 +12,7 @@ export function Section({
   const tones = {
     white: "bg-white text-ink",
     paper: "bg-paper text-ink",
-    navy: "bg-navy text-white",
+    navy: "bg-inverse text-on-inverse",
   } as const;
 
   return (

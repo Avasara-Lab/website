@@ -47,7 +47,7 @@ export default async function ServiceDetailPage({ params }: { params: Promise<{ 
             <h2 className="font-display text-3xl text-navy">What the work includes</h2>
             <ul className="mt-4 space-y-3">
               {page.capabilities.map((item) => (
-                <li key={item} className="rounded-2xl border border-line bg-white px-4 py-3 text-sm leading-6 text-ink">
+                <li key={item} className="rounded-lg border border-line bg-surface px-4 py-3 text-sm leading-6 text-ink">
                   {item}
                 </li>
               ))}
@@ -59,7 +59,7 @@ export default async function ServiceDetailPage({ params }: { params: Promise<{ 
         <h2 className="font-display text-3xl text-navy">Use cases</h2>
         <div className="mt-6 grid gap-4 md:grid-cols-2">
           {page.cases.map((item) => (
-            <article key={item.title} className="panel rounded-3xl p-6">
+            <article key={item.title} className="panel rounded-xl p-6">
               <h3 className="font-display text-2xl text-navy">{item.title}</h3>
               <p className="mt-3 text-sm leading-6 text-muted">{item.text}</p>
             </article>

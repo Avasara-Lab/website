@@ -45,7 +45,7 @@ export default function FeedbackIntelligencePage() {
         </h2>
         <div className="mt-10 grid gap-4 md:grid-cols-2">
           {feedbackValue.map((item) => (
-            <article key={item.title} className="rounded-xl border border-line bg-white p-6">
+            <article key={item.title} className="rounded-xl border border-line bg-surface p-6">
               <h3 className="text-lg font-semibold text-navy">{item.title}</h3>
               <p className="mt-2 text-sm leading-6 text-muted">{item.text}</p>
             </article>
@@ -78,13 +78,13 @@ export default function FeedbackIntelligencePage() {
               not implemented here.
             </p>
           </div>
-          <ul className="rounded-xl border border-line bg-white">
+          <ul className="rounded-xl border border-line bg-surface">
             {planned.map((item) => (
               <li
                 key={item}
                 className="border-b border-line px-5 py-4 text-sm leading-6 text-ink last:border-b-0"
               >
-                <span className="mr-2 text-xs font-semibold tracking-wide text-violet uppercase">
+                <span className="mr-2 text-xs font-semibold tracking-wide text-orange uppercase">
                   Planned
                 </span>
                 {item}
