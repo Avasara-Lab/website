@@ -25,7 +25,7 @@ export function ButtonLink({
   return (
     <Link
       href={href}
-      className={`inline-flex min-h-11 items-center justify-center gap-2 rounded-md px-4 text-sm font-semibold transition-colors ${variants[variant]}`}
+      className={`inline-flex min-h-11 items-center justify-center gap-2 rounded-full px-5 text-sm font-semibold transition-colors ${variants[variant]}`}
     >
       {children}
       {arrow ? <ArrowRight className="size-4" aria-hidden="true" /> : null}

@@ -5,14 +5,13 @@ export const site = {
   name: "Avasara Lab",
   tagline: "Turn business signals into automation opportunities.",
   description:
-    "Avasara Lab helps growing businesses turn operational challenges into practical AI solutions, intelligent automation, and actionable business insights.",
+    "Avasara Lab helps businesses uncover opportunities, build intelligent AI solutions, automate workflows, and turn ideas into measurable business outcomes.",
   url: resolveSiteUrl(process.env.NEXT_PUBLIC_SITE_URL),
 } as const;
 
 export const nav = [
   { href: "/services", label: "Services" },
   { href: "/products", label: "Products" },
-  { href: "/#how-we-work", label: "How We Work" },
   { href: "/about", label: "About" },
   { href: "/contact", label: "Contact" },
 ] as const;

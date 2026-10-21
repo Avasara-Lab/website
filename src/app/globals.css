@@ -1,17 +1,17 @@
 @import "tailwindcss";
 
 :root {
-  --paper: #f3f6f8;
-  --ink: #102033;
-  --navy: #0c2340;
-  --navy-deep: #071628;
-  --muted: #445668;
-  --line: #e1e7ee;
-  --cyan: #0c6478;
-  --cyan-soft: #e7f3f6;
-  --violet: #3f348f;
-  --background: #ffffff;
-  --foreground: #102033;
+  --paper: #f3eee6;
+  --ink: #1c1714;
+  --navy: #17332e;
+  --navy-deep: #0d221e;
+  --muted: #5e564e;
+  --line: #e4dcd0;
+  --cyan: #b24a28;
+  --cyan-soft: #f6e6de;
+  --violet: #3e514b;
+  --background: #fbf7f2;
+  --foreground: #1c1714;
 }
 
 @theme inline {
@@ -26,6 +26,7 @@
   --color-violet: var(--violet);
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-white: #fffdf9;
   --font-sans: var(--font-source);
   --font-display: var(--font-outfit);
   --font-mono: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
@@ -47,13 +48,14 @@ h1,
 h2,
 h3,
 h4 {
-  font-family: var(--font-outfit), sans-serif;
-  letter-spacing: -0.03em;
+  font-family: var(--font-outfit), Georgia, serif;
+  letter-spacing: -0.035em;
+  font-optical-sizing: auto;
 }
 
 ::selection {
-  background: #d7eef3;
-  color: #0c2340;
+  background: #f0d2c4;
+  color: #1c1714;
 }
 
 :focus-visible {
@@ -61,36 +63,90 @@ h4 {
   outline-offset: 3px;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  html {
-    scroll-behavior: auto;
-  }
+.panel {
+  border: 1px solid var(--line);
+  background: #fffdf9;
+  box-shadow: 0 1px 0 rgb(28 23 20 / 0.03);
+}
 
-  .signal-swap {
-    animation: none;
+.panel-hover {
+  transition:
+    border-color 180ms ease,
+    transform 180ms ease;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .panel-hover:hover {
+    border-color: #c9b8a4;
+    transform: translateY(-2px);
   }
 }
 
-@keyframes signal-swap {
-  from {
-    opacity: 0;
-    transform: translateY(6px);
+.marquee {
+  overflow: hidden;
+  mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+}
+
+.marquee-track {
+  display: flex;
+  width: max-content;
+  gap: 2.5rem;
+}
+
+.flow-dash {
+  stroke-dasharray: 6 10;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .marquee-track {
+    animation: marquee 36s linear infinite;
   }
 
+  .flow-dash {
+    animation: dash 2.8s linear infinite;
+  }
+
+  html.js .reveal {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+
+  html.js .reveal.is-visible {
+    animation: rise 700ms ease forwards;
+  }
+}
+
+@keyframes marquee {
+  from {
+    transform: translateX(0);
+  }
+
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes dash {
+  to {
+    stroke-dashoffset: -64;
+  }
+}
+
+@keyframes rise {
   to {
     opacity: 1;
     transform: none;
   }
 }
 
-.signal-swap {
-  animation: signal-swap 280ms ease;
-}
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
 
-.hero-grid {
-  background-image:
-    linear-gradient(to right, rgb(12 35 64 / 0.045) 1px, transparent 1px),
-    linear-gradient(to bottom, rgb(12 35 64 / 0.045) 1px, transparent 1px);
-  background-size: 56px 56px;
-  background-position: center top;
+  .marquee-track,
+  .flow-dash,
+  .reveal {
+    animation: none;
+  }
 }

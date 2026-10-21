@@ -1,14 +1,13 @@
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
 import { CtaBand } from "@/components/cta-band";
 import { Eyebrow, Section } from "@/components/section";
-import { scopeItems, services, steps } from "@/lib/content";
+import { serviceCategories } from "@/lib/services-catalog";
 import { pageMetadata } from "@/lib/site";
 
 export const metadata = pageMetadata({
   title: "Services",
   description:
-    "AI and workflow automation, custom AI development, and data and feedback intelligence. Avasara Lab scopes each project around a business problem and measurable success criteria.",
+    "AI agents, generative AI, data intelligence, product engineering, strategy, and growth work from Avasara Lab. Each engagement is scoped to a business problem.",
   path: "/services",
 });
 
@@ -17,105 +16,48 @@ export default function ServicesPage() {
     <>
       <Section className="border-b border-line">
         <Eyebrow>Services</Eyebrow>
-        <h1 className="max-w-3xl text-4xl font-semibold text-navy sm:text-5xl">
-          Practical builds for a defined operational problem.
+        <h1 className="max-w-3xl text-4xl font-medium text-navy sm:text-6xl">
+          Practical AI, software, and automation for a defined business job.
         </h1>
         <p className="mt-5 max-w-2xl text-base leading-7 text-muted">
-          Avasara Lab designs and builds AI solutions with the team that will
-          use them. Each engagement has a written scope, a first version, and
-          a way to judge whether it helped.
+          The catalogue draws on the kinds of agent, knowledge, automation, data, and product work companies ask for. Avasara Lab delivers them as scoped engagements. We do not claim certifications, named clients, or results we have not earned.
         </p>
-        <Link
-          href="/contact"
-          className="mt-8 inline-flex min-h-11 items-center gap-2 rounded-md bg-navy px-4 text-sm font-semibold text-white hover:bg-navy-deep"
-        >
-          Discuss Your Project
-          <ArrowRight className="size-4" aria-hidden="true" />
-        </Link>
+        <nav className="mt-8 flex gap-2 overflow-x-auto pb-1" aria-label="Service categories">
+          {serviceCategories.map((category) => (
+            <a key={category.id} href={`#${category.id}`} className="shrink-0 rounded-full border border-line bg-white px-4 py-2 text-sm font-semibold text-navy hover:border-navy/40">
+              {category.title.split(" and ")[0]}
+            </a>
+          ))}
+        </nav>
       </Section>
-
-      {services.map((service, index) => (
-        <Section
-          key={service.id}
-          id={service.id}
-          tone={index % 2 === 0 ? "paper" : "white"}
-        >
-          <div className="grid gap-8 lg:grid-cols-12">
-            <div className="lg:col-span-5">
-              <p className="font-mono text-xs text-cyan">0{index + 1}</p>
-              <h2 className="mt-3 text-3xl font-semibold text-navy">{service.title}</h2>
-              <p className="mt-4 text-base leading-7 text-muted">{service.detail}</p>
-              <Link
-                href={`/contact?help=${service.id}`}
-                className="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-navy"
-              >
-                Discuss this work
-                <ArrowRight className="size-4" aria-hidden="true" />
-              </Link>
-            </div>
-            <div className="lg:col-span-7">
-              <h3 className="text-sm font-semibold tracking-[0.14em] text-navy uppercase">
-                Typical deliverables
-              </h3>
-              <ul className="mt-4 divide-y divide-line rounded-xl border border-line bg-white">
-                {service.deliverables.map((item) => (
-                  <li key={item} className="px-5 py-4 text-sm leading-6 text-ink">
-                    {item}
+      {serviceCategories.map((category, index) => (
+        <section key={category.id} id={category.id} className={`scroll-mt-24 ${index % 2 ? "bg-paper" : "bg-white"}`}>
+          <div className="mx-auto w-full max-w-6xl px-5 py-16 md:px-8">
+            <div className="grid gap-8 lg:grid-cols-12">
+              <div className="lg:col-span-4">
+                <p className="font-mono text-xs text-cyan">0{index + 1}</p>
+                <h2 className="mt-2 font-display text-4xl text-navy">{category.title}</h2>
+                <p className="mt-4 text-sm leading-6 text-muted">{category.summary}</p>
+                <p className="mt-4 text-sm leading-6 text-ink">{category.outcome}</p>
+                {category.page ? (
+                  <Link href={`/services/${category.page.slug}`} className="mt-5 inline-flex text-sm font-semibold text-cyan hover:text-navy">
+                    {category.page.title}
+                  </Link>
+                ) : null}
+              </div>
+              <ul className="grid gap-3 sm:grid-cols-2 lg:col-span-8">
+                {category.offers.map((offer) => (
+                  <li key={offer.name} className="panel panel-hover rounded-2xl px-4 py-4">
+                    <h3 className="text-sm font-semibold text-navy">{offer.name}</h3>
+                    <p className="mt-1 text-sm leading-6 text-muted">{offer.text}</p>
                   </li>
                 ))}
               </ul>
             </div>
           </div>
-        </Section>
+        </section>
       ))}
-
-      <Section id="process" tone="paper">
-        <Eyebrow>Engagement</Eyebrow>
-        <h2 className="max-w-2xl text-3xl font-semibold text-navy sm:text-4xl">
-          Four steps, with the problem written down first.
-        </h2>
-        <ol className="mt-12 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          {steps.map((step, index) => (
-            <li key={step.name} className="rounded-xl border border-line bg-white p-5">
-              <p className="font-mono text-xs text-cyan">0{index + 1}</p>
-              <h3 className="mt-4 text-lg font-semibold text-navy">{step.name}</h3>
-              <p className="mt-2 text-sm leading-6 text-muted">{step.text}</p>
-            </li>
-          ))}
-        </ol>
-      </Section>
-
-      <Section>
-        <div className="grid gap-10 lg:grid-cols-2">
-          <div>
-            <Eyebrow>Scoping</Eyebrow>
-            <h2 className="text-3xl font-semibold text-navy">
-              The scope is agreed before the build.
-            </h2>
-            <p className="mt-4 text-base leading-7 text-muted">
-              A discovery conversation becomes a short written scope. Build
-              work starts after that scope is clear enough to review. Later
-              phases are separate decisions, based on what the first phase
-              showed.
-            </p>
-          </div>
-          <ul className="rounded-xl border border-line">
-            {scopeItems.map((item) => (
-              <li
-                key={item}
-                className="border-b border-line px-5 py-4 text-sm leading-6 text-ink last:border-b-0"
-              >
-                {item}
-              </li>
-            ))}
-          </ul>
-        </div>
-      </Section>
-
-      <CtaBand
-        title="Bring one problem to the first conversation."
-        copy="Tell us what is slowing the team down. We will help you decide whether it is an automation, a custom build, or a feedback question."
-      />
+      <CtaBand />
     </>
   );
 }

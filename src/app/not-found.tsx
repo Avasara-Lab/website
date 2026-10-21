@@ -6,7 +6,7 @@ export default function NotFound() {
       <p className="text-xs font-semibold tracking-[0.16em] text-cyan uppercase">
         404
       </p>
-      <h1 className="mt-3 text-4xl font-semibold text-navy">This page is not on the site.</h1>
+      <h1 className="mt-3 text-4xl font-medium text-navy">This page is not on the site.</h1>
       <p className="mt-4 max-w-lg text-base leading-7 text-muted">
         The address does not match a published page. You can return home or
         go to the project enquiry form.

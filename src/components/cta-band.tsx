@@ -1,8 +1,8 @@
 import { ButtonLink } from "@/components/button-link";
 
 export function CtaBand({
-  title = "Let's Find Your Next AI Opportunity.",
-  copy = "Tell us what is slowing your team down. We'll help you explore a practical solution.",
+  title = "Find your next opportunity with AI.",
+  copy = "Let's explore how AI, automation, and custom software can help your business work smarter.",
 }: {
   title?: string;
   copy?: string;

@@ -14,8 +14,8 @@ export default function OpenGraphImage() {
           display: "flex",
           flexDirection: "column",
           justifyContent: "space-between",
-          background: "#f3f6f8",
-          color: "#0c2340",
+          background: "#fbf7f2",
+          color: "#17332e",
           padding: "72px",
         }}
       >
@@ -25,7 +25,7 @@ export default function OpenGraphImage() {
               width: 36,
               height: 36,
               borderRadius: 8,
-              background: "#0c2340",
+              background: "#17332e",
             }}
           />
           <div style={{ fontSize: 28, fontWeight: 600 }}>Avasara Lab</div>
@@ -34,7 +34,7 @@ export default function OpenGraphImage() {
           <div style={{ fontSize: 68, fontWeight: 600, lineHeight: 1.05, letterSpacing: -1.5 }}>
             Turn business signals into automation opportunities.
           </div>
-          <div style={{ marginTop: 24, fontSize: 28, color: "#445668" }}>
+          <div style={{ marginTop: 24, fontSize: 28, color: "#5e564e" }}>
             Practical AI, workflow automation, and feedback insight for growing businesses.
           </div>
         </div>

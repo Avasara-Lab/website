@@ -1,222 +1,167 @@
-import Link from "next/link";
-import { ArrowRight } from "lucide-react";
-import { ButtonLink } from "@/components/button-link";
+import { CapabilityStrip } from "@/components/capability-strip";
 import { CtaBand } from "@/components/cta-band";
-import { Section, Eyebrow } from "@/components/section";
-import { SignalConsole } from "@/components/signal-console";
-import { problems, services, steps, useCases } from "@/lib/content";
+import { DemoStage } from "@/components/demo-stage";
+import { HeroFlow } from "@/components/hero-flow";
+import { Reveal } from "@/components/reveal";
+import { ButtonLink } from "@/components/button-link";
+import { Eyebrow } from "@/components/section";
+import { serviceCategories } from "@/lib/services-catalog";
 import { pageMetadata } from "@/lib/site";
 
 export const metadata = pageMetadata({
-  title: "Turn Business Problems Into AI Opportunities",
+  title: "Turn business complexity into intelligent opportunities",
   description:
-    "Avasara Lab builds practical AI products, intelligent automations, and custom software that help growing businesses work smarter, make better decisions, and scale faster.",
+    "Avasara Lab helps businesses uncover opportunities, build intelligent AI solutions, automate workflows, and turn ideas into measurable business outcomes.",
   path: "/",
 });
+
+const capabilities = [
+  {
+    title: "Discover opportunities",
+    text: "Identify business problems, operational inefficiencies, customer needs, and automation opportunities.",
+  },
+  {
+    title: "Build intelligent systems",
+    text: "Develop AI applications, agents, integrations, and software products around a defined job.",
+  },
+  {
+    title: "Automate and optimize",
+    text: "Improve workflows, reduce repetitive work, and measure whether the change held.",
+  },
+];
+
+const steps = [
+  { name: "Discover", text: "Start from the people, the process, and the signals the company already has." },
+  { name: "Analyze", text: "Separate a repeatable step from judgment that should stay with a person." },
+  { name: "Design", text: "Shape the workflow, the software, and the criteria for a useful result." },
+  { name: "Build", text: "Implement the agent, application, pipeline, or analysis with the team that will use it." },
+  { name: "Optimize", text: "Compare the result with the agreed criteria and decide what to keep." },
+];
+
+const industries = [
+  { name: "FinTech and financial services", text: "Onboarding, operations, and customer questions where the handoff is documented." },
+  { name: "B2B SaaS", text: "Product feedback, revenue operations, and the internal tools around a subscription business." },
+  { name: "Healthcare technology", text: "Workflow and product engineering. We do not claim clinical certification or compliance guarantees." },
+  { name: "E-commerce and retail", text: "Support volume, order questions, and the reporting that still starts in a spreadsheet." },
+  { name: "Professional services", text: "Knowledge reuse, proposal work, and the status updates clients keep requesting." },
+  { name: "Operations-intensive businesses", text: "Handoffs between systems where the same fields move every day." },
+];
 
 export default function HomePage() {
   return (
     <>
-      <section className="hero-grid border-b border-line">
-        <div className="mx-auto w-full max-w-6xl px-5 pt-16 pb-16 md:px-8 md:pt-24 md:pb-20">
-          <Eyebrow>AI technology partner</Eyebrow>
-          <div className="grid gap-8 lg:grid-cols-12 lg:items-end">
-            <h1 className="max-w-3xl text-4xl leading-[1.05] font-semibold text-balance text-navy sm:text-5xl lg:col-span-8 lg:text-6xl">
-              Turn Business Problems Into AI Opportunities.
+      <section className="border-b border-line">
+        <div className="mx-auto grid w-full max-w-6xl gap-12 px-5 py-16 md:px-8 md:py-24 lg:grid-cols-12 lg:items-center">
+          <div className="lg:col-span-5">
+            <Eyebrow>AI engineering · Intelligent automation · Product development</Eyebrow>
+            <h1 className="text-4xl leading-[1.05] font-medium text-balance text-navy sm:text-6xl">
+              Turn business complexity into intelligent opportunities.
             </h1>
-            <div className="lg:col-span-4 lg:pb-2">
-              <p className="text-base leading-7 text-muted">
-                We build practical AI products, intelligent automations, and
-                custom software that help growing businesses work smarter, make
-                better decisions, and scale faster.
-              </p>
-              <div className="mt-6 flex flex-col gap-3 sm:flex-row">
-                <ButtonLink href="/contact" arrow>
-                  Discuss Your Project
-                </ButtonLink>
-                <ButtonLink href="/products" variant="secondary">
-                  Explore Our Products
-                </ButtonLink>
-              </div>
+            <p className="mt-5 max-w-xl text-base leading-7 text-muted">
+              Avasara Lab helps businesses uncover opportunities, build intelligent AI solutions, automate workflows, and turn ideas into measurable business outcomes.
+            </p>
+            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+              <ButtonLink href="/services" arrow>
+                Explore Our Services
+              </ButtonLink>
+              <ButtonLink href="/contact" variant="secondary">
+                Let&apos;s Talk
+              </ButtonLink>
             </div>
           </div>
-          <div className="mt-12">
-            <SignalConsole />
+          <div className="lg:col-span-7">
+            <HeroFlow />
           </div>
         </div>
       </section>
 
-      <Section tone="paper">
-        <div className="max-w-2xl">
-          <Eyebrow>Where the work starts</Eyebrow>
-          <h2 className="text-3xl font-semibold text-navy sm:text-4xl">
-            Operational problems with a visible signal.
-          </h2>
-          <p className="mt-4 text-base leading-7 text-muted">
-            Avasara Lab works with founders, product leaders, and operations
-            teams when a repeating process, a pile of feedback, or a manual
-            handoff is slowing the business down.
-          </p>
-        </div>
-        <ol className="mt-12 grid gap-4 md:grid-cols-2">
-          {problems.map((problem, index) => (
-            <li key={problem.title} className="rounded-xl border border-line bg-white p-6">
-              <p className="font-mono text-xs text-cyan">0{index + 1}</p>
-              <h3 className="mt-3 text-xl font-semibold text-navy">{problem.title}</h3>
-              <p className="mt-2 text-sm leading-6 text-muted">{problem.text}</p>
-            </li>
-          ))}
-        </ol>
-      </Section>
+      <CapabilityStrip />
 
-      <Section>
-        <div className="flex flex-col justify-between gap-4 md:flex-row md:items-end">
-          <div className="max-w-2xl">
-            <Eyebrow>Services</Eyebrow>
-            <h2 className="text-3xl font-semibold text-navy sm:text-4xl">
-              Three ways to turn a problem into a build.
-            </h2>
+      <section className="bg-white">
+        <div className="mx-auto w-full max-w-6xl px-5 py-16 md:px-8 md:py-24">
+          <Reveal>
+            <Eyebrow>What we do</Eyebrow>
+            <h2 className="max-w-2xl text-4xl font-medium text-navy sm:text-5xl">Three ways an engagement starts.</h2>
+          </Reveal>
+          <div className="mt-10 grid gap-4 md:grid-cols-3">
+            {capabilities.map((item, index) => (
+              <Reveal key={item.title} delay={index * 80}>
+                <article className="panel panel-hover h-full rounded-3xl p-6">
+                  <p className="font-mono text-xs text-cyan">0{index + 1}</p>
+                  <h3 className="mt-3 font-display text-3xl text-navy">{item.title}</h3>
+                  <p className="mt-3 text-sm leading-6 text-muted">{item.text}</p>
+                </article>
+              </Reveal>
+            ))}
           </div>
-          <Link
-            href="/services"
-            className="inline-flex items-center gap-2 text-sm font-semibold text-navy"
-          >
-            Review how projects are scoped
-            <ArrowRight className="size-4" aria-hidden="true" />
-          </Link>
         </div>
-        <div className="mt-12 grid gap-4 lg:grid-cols-3">
-          {services.map((service) => (
-            <article
-              key={service.id}
-              className="flex flex-col rounded-xl border border-line p-6"
-            >
-              <h3 className="text-xl font-semibold text-navy">{service.title}</h3>
-              <p className="mt-3 flex-1 text-sm leading-6 text-muted">
-                {service.summary}
-              </p>
-              <Link
-                href={`/services#${service.id}`}
-                className="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-navy"
-              >
-                See this service
-                <ArrowRight className="size-4" aria-hidden="true" />
-              </Link>
-            </article>
-          ))}
-        </div>
-      </Section>
+      </section>
 
-      <Section id="how-we-work" tone="paper">
-        <div className="max-w-2xl">
-          <Eyebrow>How we work</Eyebrow>
-          <h2 className="text-3xl font-semibold text-navy sm:text-4xl">
-            Discover, design, build, measure.
-          </h2>
-          <p className="mt-4 text-base leading-7 text-muted">
-            Projects begin with a defined business problem, a scoped solution,
-            and measurable success criteria.
+      <section className="border-y border-line bg-paper">
+        <div className="mx-auto w-full max-w-6xl px-5 py-16 md:px-8 md:py-24">
+          <div className="flex flex-col justify-between gap-6 md:flex-row md:items-end">
+            <div>
+              <Eyebrow>Services</Eyebrow>
+              <h2 className="max-w-2xl text-4xl font-medium text-navy sm:text-5xl">A catalogue organized around the work, not a tool list.</h2>
+            </div>
+            <ButtonLink href="/services" variant="secondary">
+              View all services
+            </ButtonLink>
+          </div>
+          <div className="mt-10 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {serviceCategories.map((category) => (
+              <a key={category.id} href={`/services#${category.id}`} className="panel panel-hover rounded-3xl p-6">
+                <h3 className="font-display text-2xl text-navy">{category.title}</h3>
+                <p className="mt-3 text-sm leading-6 text-muted">{category.summary}</p>
+              </a>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <div className="mx-auto w-full max-w-6xl px-5 py-16 md:px-8 md:py-24">
+          <Eyebrow>Demonstrations</Eyebrow>
+          <h2 className="max-w-2xl text-4xl font-medium text-navy sm:text-5xl">See the shape of the work.</h2>
+          <p className="mt-4 max-w-2xl text-base leading-7 text-muted">
+            These panels use synthetic notes. They show how an engagement is framed. They are not measured client outcomes.
           </p>
+          <div className="mt-8">
+            <DemoStage />
+          </div>
         </div>
-        <ol className="mt-12 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          {steps.map((step, index) => (
-            <li key={step.name} className="rounded-xl border border-line bg-white p-5">
-              <p className="font-mono text-xs text-cyan">0{index + 1}</p>
-              <h3 className="mt-4 text-lg font-semibold text-navy">{step.name}</h3>
-              <p className="mt-2 text-sm leading-6 text-muted">{step.text}</p>
-            </li>
-          ))}
-        </ol>
-      </Section>
+      </section>
 
-      <Section>
-        <Eyebrow>Products</Eyebrow>
-        <h2 className="max-w-2xl text-3xl font-semibold text-navy sm:text-4xl">
-          Early product direction, separate from project work.
-        </h2>
-        <p className="mt-4 max-w-2xl text-base leading-7 text-muted">
-          Paid work today is scoped project delivery. The product directions
-          below are not live, production-ready, or available for purchase.
-        </p>
-        <div className="mt-12 grid gap-4 lg:grid-cols-2">
-          <article className="rounded-xl border border-line p-6 sm:p-8">
-            <p className="text-xs font-semibold tracking-[0.14em] text-cyan uppercase">
-              Early direction
-            </p>
-            <h3 className="mt-3 text-2xl font-semibold text-navy">
-              Feedback Intelligence
-            </h3>
-            <p className="mt-3 text-sm leading-6 text-muted">
-              A direction for reading customer feedback and support
-              conversations, naming recurring themes, ranking problems for
-              investigation, and attaching a recommended action.
-            </p>
-            <ul className="mt-5 space-y-2 text-sm leading-6 text-ink">
-              <li>Analyze customer feedback and support conversations.</li>
-              <li>Identify recurring themes and potential product issues.</li>
-              <li>Prioritize problems for investigation.</li>
-              <li>Turn insights into recommended actions.</li>
-            </ul>
-            <Link
-              href="/products/feedback-intelligence"
-              className="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-navy"
-            >
-              View the synthetic demo
-              <ArrowRight className="size-4" aria-hidden="true" />
-            </Link>
-          </article>
-          <article
-            id="opportunity"
-            className="scroll-mt-24 rounded-xl border border-navy bg-navy p-6 text-white sm:p-8"
-          >
-            <p className="text-xs font-semibold tracking-[0.14em] text-cyan-soft uppercase">
-              Longer-term vision
-            </p>
-            <h3 className="mt-3 text-2xl font-semibold">Opportunity Intelligence</h3>
-            <p className="mt-3 text-sm leading-6 text-white/75">
-              A future system for finding where automation and AI could create
-              measurable value. It would connect operational signals to a
-              recommended opportunity, a likely owner, and a way to judge the
-              result.
-            </p>
-            <p className="mt-5 text-sm leading-6 text-white/75">
-              This is a product vision. There is no build to try, and it is not
-              part of a current offer.
-            </p>
-            <Link
-              href="/products#opportunity"
-              className="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-white"
-            >
-              Read the roadmap note
-              <ArrowRight className="size-4" aria-hidden="true" />
-            </Link>
-          </article>
+      <section id="how-we-work" className="scroll-mt-24 bg-navy text-white">
+        <div className="mx-auto w-full max-w-6xl px-5 py-16 md:px-8 md:py-24">
+          <p className="text-xs font-semibold tracking-[0.16em] text-cyan-soft uppercase">Our approach</p>
+          <h2 className="mt-3 max-w-2xl font-display text-4xl font-medium sm:text-5xl">Discover, analyze, design, build, optimize.</h2>
+          <ol className="mt-10 grid gap-4 md:grid-cols-5">
+            {steps.map((step, index) => (
+              <li key={step.name} className="rounded-3xl border border-white/15 bg-white/5 p-4">
+                <span className="font-mono text-xs text-cyan-soft">0{index + 1}</span>
+                <h3 className="mt-3 font-display text-2xl">{step.name}</h3>
+                <p className="mt-2 text-sm leading-6 text-white/75">{step.text}</p>
+              </li>
+            ))}
+          </ol>
         </div>
-      </Section>
+      </section>
 
-      <Section tone="paper">
-        <div className="max-w-2xl">
-          <Eyebrow>Illustrative use cases</Eyebrow>
-          <h2 className="text-3xl font-semibold text-navy sm:text-4xl">
-            The shape of the work, not a client list.
-          </h2>
-          <p className="mt-4 text-base leading-7 text-muted">
-            These are illustrative situations. They are not completed client
-            projects, and they do not describe a named customer.
-          </p>
+      <section className="bg-white">
+        <div className="mx-auto w-full max-w-6xl px-5 py-16 md:px-8 md:py-24">
+          <Eyebrow>Industries</Eyebrow>
+          <h2 className="max-w-2xl text-4xl font-medium text-navy sm:text-5xl">Where the same patterns show up.</h2>
+          <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {industries.map((industry) => (
+              <article key={industry.name} className="rounded-3xl border border-line p-5">
+                <h3 className="font-display text-2xl text-navy">{industry.name}</h3>
+                <p className="mt-2 text-sm leading-6 text-muted">{industry.text}</p>
+              </article>
+            ))}
+          </div>
         </div>
-        <div className="mt-12 grid gap-4 lg:grid-cols-3">
-          {useCases.map((item) => (
-            <article key={item.title} className="rounded-xl border border-line bg-white p-6">
-              <p className="text-[11px] font-semibold tracking-[0.14em] text-cyan uppercase">
-                Illustrative use case
-              </p>
-              <h3 className="mt-3 text-xl font-semibold text-navy">{item.title}</h3>
-              <p className="mt-3 text-sm leading-6 text-muted">{item.text}</p>
-            </article>
-          ))}
-        </div>
-      </Section>
+      </section>
 
       <CtaBand />
     </>

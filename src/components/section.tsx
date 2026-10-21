@@ -17,7 +17,7 @@ export function Section({
 
   return (
     <section id={id} className={`scroll-mt-24 ${tones[tone]} ${className}`}>
-      <div className="mx-auto w-full max-w-6xl px-5 py-20 md:px-8 md:py-28">
+      <div className="mx-auto w-full max-w-6xl px-5 py-16 md:px-8 md:py-24">
         {children}
       </div>
     </section>

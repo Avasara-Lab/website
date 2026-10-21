@@ -16,7 +16,7 @@ export default function ContactPage() {
       <div className="grid gap-10 lg:grid-cols-12">
         <div className="lg:col-span-4">
           <Eyebrow>Contact</Eyebrow>
-          <h1 className="text-4xl font-semibold text-navy sm:text-5xl">
+          <h1 className="text-4xl font-medium text-navy sm:text-5xl">
             Discuss your project.
           </h1>
           <p className="mt-4 text-base leading-7 text-muted">

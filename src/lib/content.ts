@@ -230,9 +230,10 @@ export const feedbackThemes = [
 ] as const;
 
 export const helpOptions = [
-  { value: "automation", label: "AI & workflow automation" },
-  { value: "development", label: "Custom AI development" },
-  { value: "intelligence", label: "Data & feedback intelligence" },
+  { value: "automation", label: "AI agents and workflow automation" },
+  { value: "development", label: "Custom software and product engineering" },
+  { value: "intelligence", label: "Data, feedback, and decision intelligence" },
+  { value: "strategy", label: "AI strategy and opportunity audit" },
   { value: "product", label: "Feedback Intelligence direction" },
   { value: "unsure", label: "Not sure yet" },
 ] as const;

@@ -1,17 +1,17 @@
 import type { Metadata } from "next";
-import { Outfit, Source_Sans_3 } from "next/font/google";
+import { Fraunces, Manrope } from "next/font/google";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { site } from "@/lib/site";
 import "./globals.css";
 
-const outfit = Outfit({
+const outfit = Fraunces({
   subsets: ["latin"],
   variable: "--font-outfit",
   display: "swap",
 });
 
-const sourceSans = Source_Sans_3({
+const sourceSans = Manrope({
   subsets: ["latin"],
   variable: "--font-source",
   display: "swap",
@@ -60,6 +60,11 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         >
           Skip to content
         </a>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: "document.documentElement.classList.add('js')",
+          }}
+        />
         <SiteHeader />
         <main id="content" className="flex-1">
           {children}

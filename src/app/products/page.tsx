@@ -1,119 +1,55 @@
-import Link from "next/link";
-import { ArrowRight } from "lucide-react";
 import { CtaBand } from "@/components/cta-band";
+import { ButtonLink } from "@/components/button-link";
 import { Eyebrow, Section, StatusNote } from "@/components/section";
 import { pageMetadata } from "@/lib/site";
 
 export const metadata = pageMetadata({
   title: "Products",
   description:
-    "Avasara Lab product directions: Feedback Intelligence as an early experiment with a synthetic demo, and Opportunity Intelligence as a longer-term vision. Neither is for sale.",
+    "Feedback Intelligence is an early Avasara Lab direction with a synthetic demo. Opportunity Intelligence is a longer-term vision, not a finished platform.",
   path: "/products",
 });
-
-const bands = [
-  {
-    label: "Available now",
-    title: "Scoped project work",
-    text: "Companies can engage Avasara Lab today for automation, custom AI software, and feedback analysis delivered as a project. That work is scoped, built, and measured with the team. It is not a self-serve product.",
-    href: "/services",
-    link: "Review services",
-  },
-  {
-    label: "Early experiment",
-    title: "Feedback Intelligence",
-    text: "An early product direction for reading customer feedback, grouping themes, ranking issues, and recommending a next step. The page includes an interactive demo with synthetic examples. It is not a live product and it is not for purchase.",
-    href: "/products/feedback-intelligence",
-    link: "Open the demo",
-  },
-  {
-    label: "Longer-term vision",
-    title: "Opportunity Intelligence",
-    text: "A future system that would help a business find where automation and AI could create measurable value. It remains a direction for later product work. There is no prototype to use.",
-    href: "/products#opportunity",
-    link: "Read the vision",
-  },
-] as const;
 
 export default function ProductsPage() {
   return (
     <>
       <Section className="border-b border-line">
         <Eyebrow>Products</Eyebrow>
-        <h1 className="max-w-3xl text-4xl font-semibold text-navy sm:text-5xl">
-          What is real today, and what is still ahead.
+        <h1 className="max-w-3xl text-4xl font-medium text-navy sm:text-6xl">
+          Early product directions beside the service work.
         </h1>
         <p className="mt-5 max-w-2xl text-base leading-7 text-muted">
-          Avasara Lab intends to build products that can stand on their own.
-          Until those products exist, the commercial work is project delivery.
+          The company tagline remains the point: turn business signals into automation opportunities. The products below are how that idea may become software. Neither is a mature enterprise platform.
         </p>
-        <div className="mt-8 max-w-3xl">
+      </Section>
+      <Section tone="paper">
+        <div className="grid gap-4 lg:grid-cols-2">
+          <article className="panel rounded-3xl p-7">
+            <p className="text-xs font-semibold tracking-[0.14em] text-cyan uppercase">Early direction</p>
+            <h2 className="mt-3 font-display text-4xl text-navy">Feedback Intelligence</h2>
+            <p className="mt-4 text-sm leading-6 text-muted">
+              A working demonstration that groups synthetic reviews, tickets, and notes into themes, severity, and a recommended next step. It does not connect to a customer&apos;s live tools.
+            </p>
+            <div className="mt-6">
+              <ButtonLink href="/products/feedback-intelligence" arrow>
+                Open the synthetic demo
+              </ButtonLink>
+            </div>
+          </article>
+          <article className="rounded-3xl border border-line bg-navy p-7 text-white">
+            <p className="text-xs font-semibold tracking-[0.14em] text-cyan-soft uppercase">Longer-term vision</p>
+            <h2 className="mt-3 font-display text-4xl">Opportunity Intelligence</h2>
+            <p className="mt-4 text-sm leading-6 text-white/75">
+              The longer aim is a system that connects signals, opportunities, and the workflow that follows. Today that work happens as a scoped engagement, not as a product you can log into.
+            </p>
+          </article>
+        </div>
+        <div className="mt-8">
           <StatusNote>
-            No product on this site is live, production-ready, or available for
-            purchase. The demo uses synthetic examples written for the interface.
+            Service engagements are the way to start. The demos explain the shape of the work. They do not report client results.
           </StatusNote>
         </div>
       </Section>
-
-      <Section tone="paper">
-        <ol className="grid gap-4">
-          {bands.map((band, index) => (
-            <li
-              key={band.title}
-              className="rounded-xl border border-line bg-white p-6 sm:p-8"
-            >
-              <div className="grid gap-4 lg:grid-cols-12 lg:items-start">
-                <p className="font-mono text-xs text-cyan lg:col-span-2">0{index + 1}</p>
-                <div className="lg:col-span-7">
-                  <p className="text-xs font-semibold tracking-[0.14em] text-navy uppercase">
-                    {band.label}
-                  </p>
-                  <h2 className="mt-2 text-2xl font-semibold text-navy">{band.title}</h2>
-                  <p className="mt-3 text-sm leading-6 text-muted">{band.text}</p>
-                </div>
-                <div className="lg:col-span-3 lg:text-right">
-                  <Link
-                    href={band.href}
-                    className="inline-flex items-center gap-2 text-sm font-semibold text-navy"
-                  >
-                    {band.link}
-                    <ArrowRight className="size-4" aria-hidden="true" />
-                  </Link>
-                </div>
-              </div>
-            </li>
-          ))}
-        </ol>
-      </Section>
-
-      <Section id="opportunity">
-        <div className="grid gap-10 lg:grid-cols-2">
-          <div>
-            <Eyebrow>Opportunity Intelligence</Eyebrow>
-            <h2 className="text-3xl font-semibold text-navy">
-              A system for finding the next useful automation.
-            </h2>
-          </div>
-          <div className="space-y-4 text-sm leading-6 text-muted">
-            <p>
-              The longer-term idea is a product that watches operational
-              signals, such as repeated tasks, queue spikes, and unresolved
-              feedback, and points to where an automation or AI workflow could
-              change a measurable outcome.
-            </p>
-            <p>
-              A credible version would need a source of real operating data, a
-              way for the team to accept or reject a suggestion, and a record
-              of what happened after the change. None of that is built.
-            </p>
-            <p>
-              If a current process already shows that kind of opportunity, the
-              practical path is a scoped project, not a wait for this product.
-            </p>
-          </div>
-        </div>
-      </Section>
-
       <CtaBand />
     </>
   );
