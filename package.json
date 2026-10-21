@@ -10,7 +10,7 @@
     "build": "next build --webpack",
     "start": "next start",
     "lint": "eslint",
-    "test": "node --experimental-strip-types --import ./scripts/register-test-hooks.mjs --test src/lib/contact-handler.test.ts"
+    "test": "node --experimental-strip-types --import ./scripts/register-test-hooks.mjs --test src/lib/contact-handler.test.ts src/lib/site-url.test.ts"
   },
   "dependencies": {
     "lucide-react": "^1.60.0",

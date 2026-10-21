@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
+import { resolveSiteUrl } from "./site-url";
 
 export const site = {
   name: "Avasara Lab",
   tagline: "Turn business signals into automation opportunities.",
   description:
     "Avasara Lab helps growing businesses turn operational challenges into practical AI solutions, intelligent automation, and actionable business insights.",
-  url: process.env.NEXT_PUBLIC_SITE_URL ?? "https://avasaralab.com",
+  url: resolveSiteUrl(process.env.NEXT_PUBLIC_SITE_URL),
 } as const;
 
 export const nav = [

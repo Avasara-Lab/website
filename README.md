@@ -32,7 +32,7 @@ npm run build
 
 Copy `.env.example` to `.env.local` and fill in the values. `.env.local` is gitignored. Never commit real credentials.
 
-Set `NEXT_PUBLIC_SITE_URL` to the public site origin, including the scheme, before production. Canonical URLs, the sitemap, robots, and social metadata use it. When the variable is unset, those URLs use `https://avasaralab.com`.
+Set `NEXT_PUBLIC_SITE_URL` to an absolute origin, including `https://`, before production. Canonical URLs, the sitemap, robots, and social metadata use it. When the variable is unset, those URLs use `https://avasaralab.com`. A hostname without a scheme, including `www.avasaralab.com`, is normalized to that same origin. `www` is not the canonical host. Any other malformed value fails the build.
 
 The contact form needs three server-only variables:
 
