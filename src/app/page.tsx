@@ -51,31 +51,27 @@ export default function HomePage() {
   return (
     <>
       <section className="border-b border-line">
-        <div className="mx-auto w-full max-w-6xl px-5 py-16 md:px-8 md:py-24">
-          <div className="grid items-end gap-8 lg:grid-cols-12">
-            <div className="lg:col-span-7">
-              <Eyebrow>AI engineering · Intelligent automation</Eyebrow>
-              <h1 className="text-4xl leading-[1.05] font-semibold text-navy sm:text-5xl lg:text-6xl">
-                Find the opportunity.
-                <br />
-                Build the intelligence.
-                <br />
-                Automate the outcome.
-              </h1>
-            </div>
-            <div className="lg:col-span-5">
-              <p className="text-base leading-7 text-muted">{site.description}</p>
-              <div className="mt-6 flex flex-col gap-3 sm:flex-row">
-                <ButtonLink href="/contact" arrow>
-                  Discuss Your Project
-                </ButtonLink>
-                <ButtonLink href="/services" variant="secondary">
-                  Explore Our Services
-                </ButtonLink>
-              </div>
+        <div className="mx-auto grid w-full max-w-6xl items-start gap-10 px-5 py-14 md:px-8 lg:grid-cols-12 lg:items-center lg:gap-10 lg:py-10 xl:py-12">
+          <div className="lg:col-span-7">
+            <Eyebrow>AI engineering · Intelligent automation</Eyebrow>
+            <h1 className="text-4xl leading-[1.05] font-semibold text-navy sm:text-5xl lg:text-[2.75rem] xl:text-5xl">
+              Find the opportunity.
+              <br />
+              Build the intelligence.
+              <br />
+              Automate the outcome.
+            </h1>
+            <p className="mt-5 max-w-xl text-base leading-7 text-muted">{site.description}</p>
+            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+              <ButtonLink href="/contact" arrow>
+                Discuss Your Project
+              </ButtonLink>
+              <ButtonLink href="/services" variant="secondary">
+                Explore Our Services
+              </ButtonLink>
             </div>
           </div>
-          <div className="mt-12">
+          <div className="lg:col-span-5">
             <HeroFlow />
           </div>
         </div>

@@ -1,8 +1,18 @@
 # Avasara Lab
 
-Marketing site for Avasara Lab, an AI technology partner for US B2B SaaS startups and growing businesses.
+Marketing site for Avasara Lab, an AI engineering and intelligent automation company for US and global B2B teams.
 
-The site presents services, an early Feedback Intelligence demo, and a project enquiry form. It does not invent clients, metrics, or a live product.
+The homepage line is “Find the opportunity. Build the intelligence. Automate the outcome.” The supporting idea is the tagline: turn business signals into automation opportunities. The site presents six service categories, an early Feedback Intelligence demo, and a project enquiry form. It does not invent clients, metrics, certifications, or a live product.
+
+## Design
+
+Black, white, and gray are the brand. Blue is the technology accent. Orange marks opportunities and the occasional highlight. The values live as CSS variables in `src/app/globals.css`, with a light set and a dark set.
+
+The navigation control cycles Light, Dark, and System. The choice is stored in `localStorage` as `avasara-theme`. A blocking script in the document head applies it before the first paint, so a saved dark theme does not flash white. With nothing stored, the site follows the operating system.
+
+Type is Inter, loaded through `next/font`.
+
+On a phone, the hero stacks the headline, the paragraph, the two actions, and a vertical Opportunity Intelligence path. On a large screen that same path sits beside the copy, so the diagram is in the first view instead of under a split headline. Opportunity Intelligence is a strategic direction. The path uses synthetic notes and is not a product a customer can log into.
 
 ## Develop
 
@@ -23,10 +33,18 @@ npm run build
 
 - `/` homepage
 - `/services`
+- `/services/ai-agents`
+- `/services/generative-ai`
+- `/services/data-intelligence`
+- `/services/saas-development`
+- `/services/opportunity-audits`
+- `/services/workflow-automation`
 - `/products`
 - `/products/feedback-intelligence`
 - `/about`
 - `/contact`
+
+The service pages are generated from `src/lib/services-catalog.ts`. The six categories are AI agents and intelligent automation, generative AI and knowledge systems, data engineering and business intelligence, custom software and product engineering, AI infrastructure and implementation, and AI-powered growth and opportunity intelligence.
 
 ## Configuration
 
