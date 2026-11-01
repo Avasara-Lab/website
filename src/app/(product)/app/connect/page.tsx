@@ -1,5 +1,5 @@
 import { UploadForm } from "@/components/app/client";
-import { Notice, PageIntro, StatusBadge } from "@/components/app/ui";
+import { Empty, Notice, PageIntro, StatusBadge } from "@/components/app/ui";
 import { formatWhen, labelize } from "@/lib/app-labels";
 import { requireOrg } from "@/server/auth/context";
 import { canWrite } from "@/server/domain";
@@ -18,6 +18,7 @@ export default async function ConnectPage() {
       {canWrite(context.role) ? <UploadForm /> : <p className="text-sm leading-6 text-muted">Your role can view sources. Uploads require a manager, administrator, or owner.</p>}
       <section className="grid gap-3">
         <h2 className="text-lg font-semibold text-navy">Sources</h2>
+        {!data.sources.length ? <Empty title="No data sources" text="Creating an organization adds file upload and the unconfigured connectors." /> : null}
         {data.sources.map((source) => (
           <article key={source.id} className="panel flex flex-wrap items-center justify-between gap-3 rounded-xl p-4">
             <div>

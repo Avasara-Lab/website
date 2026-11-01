@@ -65,7 +65,7 @@ Marketing pages and `POST /api/contact` need three server-only variables:
 
 Those routes do not open PostgreSQL and do not call an analysis or CRM service.
 
-`/login`, `/register`, `/app`, `/api/auth`, and `/api/app` also need `DATABASE_URL` and `BETTER_AUTH_SECRET`. `DATABASE_URL` must be a PostgreSQL connection string. `BETTER_AUTH_URL` must be the origin the browser uses. `MODEL_API_KEY`, Redis, and Cloudflare R2 are optional. Without `MODEL_API_KEY`, live model calls are blocked and no other provider is used.
+`/login`, `/register`, `/app`, `/api/auth`, and `/api/app` also need `DATABASE_URL` and `BETTER_AUTH_SECRET`. `DATABASE_URL` must be a PostgreSQL connection string. `BETTER_AUTH_URL` must be the origin the browser uses. `MODEL_API_KEY`, Redis, and Cloudflare R2 are optional. An empty or whitespace `MODEL_API_KEY` blocks live model calls. The app does not call another provider. `META_API_BASE_URL`, if set, must stay `https://api.meta.ai/v1`. Any other host is refused.
 
 ## Lead capture
 
@@ -137,7 +137,7 @@ Two profiles share one process:
 | `DATABASE_URL` | Omit | Required | Server only. PostgreSQL URL (`postgres://` or `postgresql://`), including the provider’s TLS parameters when it requires them (for example `sslmode=require`). |
 | `BETTER_AUTH_SECRET` | Omit | Required | Server only. At least 32 random characters in production. Never commit a real value. |
 | `BETTER_AUTH_URL` | Omit | Required | Server only. Absolute origin of this deployment, with no path. Cookie and trusted-origin base in `src/server/auth/auth.ts`. |
-| `MODEL_API_KEY` | Omit | Optional | Server only. Empty means live Meta calls are blocked. No other model vendor is called. |
+| `MODEL_API_KEY` | Omit | Optional | Server only. Empty or whitespace means live Meta calls are blocked. No other model vendor is called. |
 | `REDIS_URL` | Omit | Optional | Server only. Used only when `INGESTION_MODE=queue`. |
 | `INGESTION_MODE` | Omit | Optional | Leave unset. The default processes an upload in the request. |
 | `R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_BUCKET` | Omit | Optional | Server only. When any one is missing, files go to `.data/uploads` on the server disk. |
@@ -169,9 +169,9 @@ node --experimental-strip-types --import ./scripts/register-test-hooks.mjs scrip
 
 ### Seed
 
-`npm run db:seed` creates the user `founder@avasara-demo.test` with the password `DemoFounder!2026` and the synthetic organization Avasara Demo Technologies, then ingests synthetic records. The password is in the repository. Running it again does not duplicate events.
+`npm run db:seed` creates the synthetic user `founder@avasara-demo.test` with the password `DemoFounder!2026` and the synthetic organization Avasara Demo Technologies, then ingests synthetic records. The password is in the repository. It is a local demo credential, not a production account. Running the command again does not duplicate events, and it writes into the synthetic company even if that user already belongs to another organization.
 
-Run the seed only on local and other non-production databases. Do not run it on a production database. A production workspace starts empty: register a real account and create an organization in the product.
+The command exits before any write when `NODE_ENV` is `production`, when `BETTER_AUTH_URL` is `https://avasaralab.com` (or `www`), or when `DATABASE_URL` points at the production database. A local `NEXT_PUBLIC_SITE_URL` of `https://avasaralab.com` does not block the seed. A production workspace starts empty: register a real account and create an organization in the product.
 
 ### Redis, uploads, and the model key
 
@@ -179,7 +179,9 @@ Leave `INGESTION_MODE` unset on Hostinger. The default handles an upload inside 
 
 `.data/uploads` is the fallback file store. A Node deploy replaces the site contents, so files written there do not survive the next deploy. Set `R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, and `R2_BUCKET` when uploads must be kept. `R2_ENDPOINT` is optional.
 
-Leave `MODEL_API_KEY` unset until you intend to call Meta. The AI screen and `POST /api/app/ai` report that live calls are blocked. Do not put a substitute provider in its place.
+Leave `MODEL_API_KEY` unset until you intend to call Meta. The AI screen and `POST /api/app/ai` report that live calls are blocked, including a whitespace value. Do not put a substitute provider in its place. `META_API_BASE_URL` is optional and must remain `https://api.meta.ai/v1`.
+
+Team invitations use `RESEND_API_KEY` and `CONTACT_FROM_EMAIL`. `CONTACT_TO_EMAIL` stays the contact-form inbox and is not the invitation recipient. When both invitation variables are set, Resend is asked to send the accept link to the invited address. The response says the email was accepted only after Resend returns a message id. When either variable is missing, or Resend rejects the send, the API keeps the one-time path and says that email was not sent.
 
 ### Hostinger Node.js
 
@@ -231,6 +233,7 @@ Full product, after migrations:
 - `/register` and `/login` render.
 - Register an account, sign in, create an organization, and open `/app`.
 - Open `/app/ai` as an owner or administrator. With `MODEL_API_KEY` unset, the screen says live Meta calls are blocked. Other roles see “Key configured: no”.
+- Invite a teammate from `/app/team`. With Resend unset, the screen says email was not sent and shows the one-time path. With `RESEND_API_KEY` and `CONTACT_FROM_EMAIL` set, the screen says Resend accepted the email only after a message id comes back.
 
 Non-production database only:
 
@@ -253,11 +256,11 @@ npm run db:seed
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000). Sign in to the seeded synthetic company with `founder@avasara-demo.test` and `DemoFounder!2026`. That company is labeled synthetic. Its counts are not customer results.
+Open [http://localhost:3000](http://localhost:3000). Sign in to the seeded synthetic company with `founder@avasara-demo.test` and `DemoFounder!2026`. That company is labeled synthetic. Its counts are not customer results. Those credentials are for a non-production database only.
 
-`npm run db:seed` creates the user through Better Auth and ingests the synthetic records through the same pipeline as an upload. Running it again does not duplicate events. Use it on local and other non-production databases. The password is in this repository, so do not seed a production database. Production migration and seed rules are in [Production deploy](#production-deploy).
+`npm run db:seed` creates the user through Better Auth and ingests the synthetic records through the same pipeline as an upload. Running it again does not duplicate events. It refuses a production origin and the production database. Production migration and seed rules are in [Production deploy](#production-deploy).
 
-Set `MODEL_API_KEY` to call Meta Model API at `https://api.meta.ai/v1`. Without it, AI configuration reports that live calls are blocked. The app does not call another model vendor. Optional R2 variables switch uploads from `.data/uploads` to Cloudflare R2. Set `INGESTION_MODE=queue` and `REDIS_URL`, then run `npm run worker`, to process uploads with BullMQ. The default processes an upload in the request and still writes an ingestion job.
+Set `MODEL_API_KEY` to call Meta Model API at `https://api.meta.ai/v1`. Without it, AI configuration reports that live calls are blocked. The app does not call another model vendor. The configuration screen maps Muse Spark to `POST /chat/completions`, Muse Wonder to `POST /responses`, Muse Voice Transcribe to `POST /asr/transcribe`, and Muse Image to `POST /images/generations`. Contributor model ids are labeled as Contributor mode. Optional R2 variables switch uploads from `.data/uploads` to Cloudflare R2. Set `INGESTION_MODE=queue` and `REDIS_URL`, then run `npm run worker`, to process uploads with BullMQ. The default processes an upload in the request and still writes an ingestion job. Redis and R2 are unused when those variables are unset.
 
 ### Checks
 
@@ -274,8 +277,8 @@ npm run build
 - HubSpot, Gmail, Slack, Notion, ClickUp, and QuickBooks are listed as needing configuration. Credentials are not stored and no sync is pretended.
 - The support agent writes to a simulated inbox. The log says simulated.
 - Sales follow-up and reporting recommendations have no executor.
-- Muse Spark Open and Muse Glimmer are open-weight and are not called on the hosted API. SAM 3.1 is documented and not requested, because this release does not assemble a media-segmentation body.
-- Invitation email is not sent. The owner is shown a one-time accept path.
+- Muse Spark Open and Muse Glimmer are open-weight and are not called on the hosted API. SAM 3.1 is documented and not requested, because this release does not assemble a media-segmentation body. Realtime transcription and image edits are not requested.
+- Invitation email is sent only when `RESEND_API_KEY` and `CONTACT_FROM_EMAIL` are set and Resend returns a message id. Otherwise the owner is shown the one-time accept path and a message that email was not sent.
 
 ## Product status
 

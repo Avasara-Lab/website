@@ -1,8 +1,8 @@
 import { AiConfigForm } from "@/components/app/client";
-import { Notice, PageIntro, Section, StatusBadge } from "@/components/app/ui";
+import { Empty, Notice, PageIntro, Section, StatusBadge } from "@/components/app/ui";
 import { requireOrg } from "@/server/auth/context";
 import { canAdminister } from "@/server/domain";
-import { OPEN_WEIGHT_NOTES, SAM_NOTE } from "@/server/modules/meta-ai/catalog";
+import { META_CAPABILITIES, OPEN_WEIGHT_NOTES, SAM_NOTE } from "@/server/modules/meta-ai/catalog";
 import { aiSnapshot } from "@/server/modules/read/service";
 
 export default async function AiPage() {
@@ -14,7 +14,7 @@ export default async function AiPage() {
       <PageIntro
         eyebrow="Meta Model API"
         title="Model configuration"
-        text="Calls go to the Meta Model API with the server-side MODEL_API_KEY. The browser never receives the key. If the key is missing, live calls stay blocked."
+        text="Calls go to https://api.meta.ai/v1 with the server-side MODEL_API_KEY. An empty key blocks the call. The browser never receives the key, and no other provider is called."
       />
       {canAdminister(context.role) && config ? (
         <AiConfigForm
@@ -28,10 +28,22 @@ export default async function AiPage() {
         <Notice tone={data.keyConfigured ? "info" : "warning"} title={data.keyConfigured ? "Server key is set" : "Live Meta calls are paused"}>
           {data.keyConfigured
             ? "MODEL_API_KEY is set on the server. Only an owner or administrator can change model selection. The key is not shown here."
-            : "Set MODEL_API_KEY on the server when you want live calls. No other model provider is used. Only an owner or administrator can change model selection."}
+            : "Live Meta calls are blocked. MODEL_API_KEY is empty. No other model provider is used. Only an owner or administrator can change model selection."}
         </Notice>
       )}
-      <Section title="Model notes" text="These notes describe the models this workspace can select. They are not usage statistics.">
+      <Section title="What each call can do" text="These are the Meta endpoints this workspace is allowed to use. They are not usage statistics.">
+        <ul className="grid gap-3">
+          {META_CAPABILITIES.map((item) => (
+            <li key={item.key} className="panel rounded-xl p-4 text-sm">
+              <p className="font-semibold text-navy">{item.label}</p>
+              <p className="text-muted">{item.endpoint}</p>
+              <p className="mt-1 text-navy">{item.purpose}</p>
+              <p className="mt-1 leading-6 text-muted">{item.note}</p>
+            </li>
+          ))}
+        </ul>
+      </Section>
+      <Section title="Model notes" text="Open-weight models are described here. This app does not call another provider for them.">
         <div className="grid gap-2">
           {OPEN_WEIGHT_NOTES.map((item) => (
             <p key={item.name} className="text-sm leading-6 text-muted">
@@ -41,7 +53,7 @@ export default async function AiPage() {
           <p className="text-sm leading-6 text-muted">{SAM_NOTE}</p>
         </div>
       </Section>
-      <Section title="Usage log" text="Calls recorded for this organization. An empty log means no Meta request has been stored yet.">
+      <Section title="Usage log" text="Calls recorded for this organization. A missing MODEL_API_KEY is logged as blocked.">
         {data.usage.length ? (
           <ul className="grid gap-2">
             {data.usage.map((row) => (
@@ -55,7 +67,7 @@ export default async function AiPage() {
             ))}
           </ul>
         ) : (
-          <p className="text-sm leading-6 text-muted">No Meta calls have been logged for this organization.</p>
+          <Empty title="No Meta calls yet" text="A catalog check or an interpretation writes a row here. A missing MODEL_API_KEY is logged as blocked." />
         )}
       </Section>
     </>

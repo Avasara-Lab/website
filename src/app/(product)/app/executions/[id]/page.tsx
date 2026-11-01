@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { PageIntro, StatusBadge } from "@/components/app/ui";
+import { Empty, PageIntro, StatusBadge } from "@/components/app/ui";
 import { formatWhen, labelize } from "@/lib/app-labels";
 import { requireOrg } from "@/server/auth/context";
 import { runDetail } from "@/server/modules/read/service";
@@ -32,6 +32,7 @@ export default async function ExecutionPage({ params }: { params: Promise<{ id: 
         </Link>
         .
       </p>
+      {!detail.logs.length ? <Empty title="No log entries" text="This run has no recorded steps." /> : null}
       <ol className="grid gap-3">
         {detail.logs.map((entry, index) => (
           <li key={entry.id} className="panel rounded-xl p-4">
@@ -50,7 +51,6 @@ export default async function ExecutionPage({ params }: { params: Promise<{ id: 
           </li>
         ))}
       </ol>
-      {!detail.logs.length ? <p className="text-sm text-muted">This run has no log entries.</p> : null}
     </>
   );
 }

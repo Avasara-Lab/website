@@ -1,4 +1,4 @@
-import { PageIntro, Section, Stat, StatusBadge } from "@/components/app/ui";
+import { Empty, PageIntro, Section, Stat, StatusBadge } from "@/components/app/ui";
 import { formatWhen, labelize } from "@/lib/app-labels";
 import { requireOrg } from "@/server/auth/context";
 import { memorySnapshot } from "@/server/modules/read/service";
@@ -30,7 +30,7 @@ export default async function MemoryPage() {
             ))}
           </ul>
         ) : (
-          <p className="text-sm text-muted">No observed events yet.</p>
+          <Empty title="No observed events" text="Upload a file or load the synthetic seed. Counts stay at zero until observed rows exist." />
         )}
       </Section>
       <Section title="Entities" text={shown.length < data.entities.length ? `Showing ${shown.length} of ${data.entities.length}.` : undefined}>
@@ -57,7 +57,7 @@ export default async function MemoryPage() {
               <p className="mt-2 text-xs text-muted">{formatWhen(event.occurredAt, true)}</p>
             </article>
           ))}
-          {!data.events.length ? <p className="text-sm text-muted">No events stored yet.</p> : null}
+          {!data.events.length ? <Empty title="No recent events" text="Observed events and interpretations for this organization show up here." /> : null}
         </div>
       </Section>
       <p className="text-sm leading-6 text-muted">

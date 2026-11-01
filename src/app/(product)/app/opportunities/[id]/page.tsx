@@ -1,10 +1,10 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { OpportunityActions } from "@/components/app/client";
-import { Badge, KeyFacts, PageIntro, Section, StatusBadge } from "@/components/app/ui";
+import { InterpretButton, OpportunityActions } from "@/components/app/client";
+import { Badge, Empty, KeyFacts, PageIntro, Section, StatusBadge } from "@/components/app/ui";
 import { formatConfidence, formatWhen, labelize } from "@/lib/app-labels";
 import { requireOrg } from "@/server/auth/context";
-import { canWrite } from "@/server/domain";
+import { canAdminister, canWrite } from "@/server/domain";
 import { opportunityDetail } from "@/server/modules/read/service";
 
 export default async function OpportunityPage({ params }: { params: Promise<{ id: string }> }) {
@@ -12,7 +12,7 @@ export default async function OpportunityPage({ params }: { params: Promise<{ id
   const context = await requireOrg();
   const detail = await opportunityDetail(context.db, context.organizationId, id);
   if (!detail) notFound();
-  const { opportunity, signals, evidence, approvals, agents } = detail;
+  const { opportunity, signals, evidence, approvals, agents, interpretations } = detail;
   const evidenceBySignal = signals.map((signal) => ({
     signal,
     items: evidence.filter((item) => item.signalId === signal.id),
@@ -87,25 +87,44 @@ export default async function OpportunityPage({ params }: { params: Promise<{ id
             ))}
           </ul>
         ) : (
-          <p className="text-sm leading-6 text-muted">No supporting signals are linked.</p>
+          <Empty title="No signals linked" text="This opportunity has no supporting signals in this organization." />
         )}
       </Section>
       <Section
         title="Evidence trail"
         text={`${evidence.length} linked event${evidence.length === 1 ? "" : "s"}. Each row keeps its provenance so an observed record is distinct from an estimate or a simulation.`}
       >
-        <div className="grid gap-4">
-          {evidenceBySignal.map(({ signal, items }) => (
-            <div key={signal.id} className="grid gap-2">
-              <h3 className="text-sm font-semibold text-navy">{signal.title}</h3>
-              {items.length ? items.map((item) => <EvidenceCard key={`${item.signalId}-${item.eventId}-${item.role}`} item={item} />) : <p className="text-sm text-muted">No events linked to this signal.</p>}
-            </div>
-          ))}
-          {ungrouped.map((item) => (
-            <EvidenceCard key={`${item.signalId}-${item.eventId}-${item.role}`} item={item} />
-          ))}
-          {!evidence.length ? <p className="text-sm leading-6 text-muted">No evidence events are stored for this opportunity yet.</p> : null}
-        </div>
+        {evidence.length ? (
+          <div className="grid gap-4">
+            {evidenceBySignal.map(({ signal, items }) => (
+              <div key={signal.id} className="grid gap-2">
+                <h3 className="text-sm font-semibold text-navy">{signal.title}</h3>
+                {items.length ? items.map((item) => <EvidenceCard key={`${item.signalId}-${item.eventId}-${item.role}`} item={item} />) : <p className="text-sm text-muted">No events linked to this signal.</p>}
+              </div>
+            ))}
+            {ungrouped.map((item) => (
+              <EvidenceCard key={`${item.signalId}-${item.eventId}-${item.role}`} item={item} />
+            ))}
+          </div>
+        ) : (
+          <Empty title="No evidence rows" text="Evidence appears when a signal points at an observed event in this organization." />
+        )}
+      </Section>
+      <Section title="Model interpretation" text="An interpretation is not evidence. A missing MODEL_API_KEY blocks the call. No other provider is used.">
+        {canAdminister(context.role) ? <InterpretButton opportunityId={opportunity.id} /> : <p className="text-sm leading-6 text-muted">Only an owner or administrator can request an interpretation.</p>}
+        {interpretations.length ? (
+          <ul className="grid gap-2">
+            {interpretations.map((note) => (
+              <li key={note.id} className="panel rounded-xl p-4">
+                <StatusBadge value={note.provenance} />
+                <p className="mt-2 text-sm leading-6 text-navy">{note.body}</p>
+                <p className="mt-2 text-xs text-muted">{note.model || "Model not recorded"} · {formatWhen(note.createdAt, true)}</p>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <Empty title="No interpretation stored" text="Ask Muse Spark after evidence exists, or leave this empty while the key is unset." />
+        )}
       </Section>
       <Section title="Approvals" text="A decision appears here after someone approves or rejects.">
         {approvals.length ? (

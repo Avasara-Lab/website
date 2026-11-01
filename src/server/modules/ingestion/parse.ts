@@ -47,7 +47,11 @@ const HEADER_MAP: Record<string, string> = {
 };
 
 function normalizeKey(key: string) {
-  return HEADER_MAP[key.trim().toLowerCase().replace(/\s+/g, "_")] ?? null;
+  const trimmed = key.trim().replace(/\s+/g, "_");
+  const direct = HEADER_MAP[trimmed.toLowerCase()];
+  if (direct) return direct;
+  const snake = trimmed.replace(/([a-z0-9])([A-Z])/g, "$1_$2").toLowerCase();
+  return HEADER_MAP[snake] ?? null;
 }
 
 function isEventType(value: string): value is EventType {
@@ -164,6 +168,23 @@ export function parseCsvRows(text: string) {
   return rows;
 }
 
+function isPlainObject(value: unknown): value is Record<string, unknown> {
+  return Boolean(value) && typeof value === "object" && !Array.isArray(value) && !(value instanceof Date);
+}
+
+/** Copy known fields onto a row. Nested objects, including `attributes`, are flattened so their known keys survive. */
+function fillRow(source: Record<string, unknown>, row: Record<string, string>) {
+  for (const [key, value] of Object.entries(source)) {
+    if (value == null || isPlainObject(value)) continue;
+    const mapped = normalizeKey(key);
+    if (!mapped || row[mapped]) continue;
+    row[mapped] = cellString(value);
+  }
+  for (const value of Object.values(source)) {
+    if (isPlainObject(value)) fillRow(value, row);
+  }
+}
+
 export function parseJsonRecords(text: string): NormalizedRecord[] {
   let parsed: unknown;
   try {
@@ -176,14 +197,9 @@ export function parseJsonRecords(text: string): NormalizedRecord[] {
     : null;
   if (!list) throw new ParseError("JSON must be an array of records or an object with a records array.");
   return list.slice(0, MAX_RECORDS).map((item, index) => {
-    if (!item || typeof item !== "object") throw new ParseError(`JSON record ${index + 1} is not an object.`);
-    const source = item as Record<string, unknown>;
+    if (!item || typeof item !== "object" || Array.isArray(item)) throw new ParseError(`JSON record ${index + 1} is not an object.`);
     const row: Record<string, string> = {};
-    for (const [key, value] of Object.entries(source)) {
-      const mapped = normalizeKey(key);
-      if (!mapped || value == null) continue;
-      row[mapped] = cellString(value);
-    }
+    fillRow(item as Record<string, unknown>, row);
     return recordFromRow(row, index + 1);
   });
 }

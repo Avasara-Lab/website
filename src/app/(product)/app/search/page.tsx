@@ -17,10 +17,10 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
         text="Search looks at this organization’s signals, opportunities, and events. Enter at least two characters."
       />
       {query.length < 2 ? (
-        <Empty title="Type a little more" text="Use the search field above. Two or more characters search this organization only." />
+        <Empty title="Enter at least two characters" text="Results stay empty until the query is long enough to search this organization." />
       ) : null}
       {query.length >= 2 && !total ? (
-        <Empty title="No matches" text="Nothing in this organization matches that text. Try a signal title, an opportunity, or words from an event." />
+        <Empty title="No matches" text="Nothing in this organization matches that query." />
       ) : null}
       {query.length >= 2 && total ? (
         <>
@@ -35,6 +35,7 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
                   </p>
                 </li>
               ))}
+              {!results.signals.length ? <li className="text-sm text-muted">None.</li> : null}
             </ul>
           </Section>
           <Section title="Opportunities" text={results.opportunities.length ? "Open a result to review evidence." : "No opportunity titles matched."}>
@@ -50,6 +51,7 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
                   </Link>
                 </li>
               ))}
+              {!results.opportunities.length ? <li className="text-sm text-muted">None.</li> : null}
             </ul>
           </Section>
           <Section title="Events" text={results.events.length ? "Events are listed here. Open Business Memory for the wider record." : "No event text matched."}>
@@ -63,6 +65,7 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
                   <p className="mt-2 font-semibold text-navy">{item.title}</p>
                 </li>
               ))}
+              {!results.events.length ? <li className="text-sm text-muted">None.</li> : null}
             </ul>
           </Section>
         </>

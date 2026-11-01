@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Search } from "lucide-react";
 import { OrgSwitcher } from "@/components/app/client";
 import { AppNav } from "@/components/app/nav";
-import { Notice, StatusBadge } from "@/components/app/ui";
+import { Notice, StatusBadge, secondaryButtonClass } from "@/components/app/ui";
 import type { OrgContext } from "@/server/auth/context";
 
 export function AppShell({
@@ -47,7 +47,7 @@ export function AppShell({
                 className="min-h-10 w-full rounded-lg border border-line bg-surface pr-3 pl-9 text-sm text-navy"
               />
             </div>
-            <button className="sr-only" type="submit">
+            <button className={`${secondaryButtonClass} shrink-0`} type="submit">
               Search
             </button>
             <p className="hidden max-w-56 truncate text-sm text-muted md:block" title={context.email}>

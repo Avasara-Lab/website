@@ -112,7 +112,8 @@ test("a visitor cannot choose the recipient", async () => {
   const mailer = createResendMailer(config, {
     emails: {
       async send(payload) {
-        sent.push({ replyTo: payload.replyTo, to: payload.to });
+        assert.equal(typeof payload.replyTo, "string");
+        sent.push({ replyTo: payload.replyTo ?? "", to: payload.to });
         assert.equal("html" in payload, false);
         assert.match(payload.text, /<script>alert\(1\)<\/script>/);
         assert.doesNotMatch(payload.subject, /[\r\n]/);
