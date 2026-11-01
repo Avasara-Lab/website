@@ -8,13 +8,14 @@ import postgres from "postgres";
 import { DEMO_AS_OF, DEMO_COMPANY, buildSyntheticRecords } from "@/server/demo/synthetic-company";
 import * as schema from "@/server/db/schema";
 import { businessEvents, dataSources, signals } from "@/server/db/schema";
-import { createId } from "@/server/ids";
+import { createId, sha256 } from "@/server/ids";
 import { WorkflowError, createSupportAgent, decideOpportunity, executeSupportWorkflow } from "@/server/modules/agents/execute";
 import { UploadError, acceptUpload } from "@/server/modules/business-connect/service";
 import { buildImpact } from "@/server/modules/impact/service";
 import { ingestRecords } from "@/server/modules/ingestion/persist";
 import { loadObservedEvents } from "@/server/modules/intelligence/service";
-import { createOrganization } from "@/server/modules/organizations/service";
+import { createOrganization, acceptInvitation, createInvitation } from "@/server/modules/organizations/service";
+import { searchWorkspace, teamSnapshot } from "@/server/modules/read/service";
 
 test("register through impact keeps organizations isolated", async () => {
   process.env.BETTER_AUTH_SECRET = "test-secret-test-secret";
@@ -120,6 +121,31 @@ test("register through impact keeps organizations isolated", async () => {
     () => acceptUpload(db, { organizationId, userId: ownerId, filename: "notes.csv", bytes: file }),
     (error: unknown) => error instanceof UploadError && error.status === 409,
   );
+
+  const invite = await createInvitation(db, {
+    organizationId,
+    email: "reader@example.test",
+    role: "member",
+    createdBy: ownerId,
+  });
+  const [storedInvite] = await db.select().from(schema.invitations).where(eq(schema.invitations.id, invite.id));
+  assert.ok(storedInvite);
+  assert.equal(storedInvite.tokenHash, sha256(invite.token));
+  assert.notEqual(storedInvite.tokenHash, invite.token);
+  await assert.rejects(
+    () => acceptInvitation(db, { token: invite.token, userId: otherId, email: "other@example.test" }),
+    /invited email/,
+  );
+  assert.equal(await acceptInvitation(db, { token: invite.token, userId: memberId, email: "Reader@example.test" }), organizationId);
+  const otherTeam = await teamSnapshot(db, otherOrganizationId);
+  assert.equal(otherTeam.pending.length, 0);
+  assert.equal(otherTeam.members.some((member) => member.email === "reader@example.test"), false);
+  const leaked = await searchWorkspace(db, otherOrganizationId, "password reset");
+  assert.equal(leaked.events.length, 0);
+  assert.equal(leaked.opportunities.length, 0);
+  assert.equal(leaked.signals.length, 0);
+  const ownSearch = await searchWorkspace(db, organizationId, "password reset");
+  assert.equal(ownSearch.events.length > 0, true);
 
   await sql.end();
 });

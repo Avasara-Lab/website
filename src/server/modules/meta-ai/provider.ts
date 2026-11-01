@@ -1,4 +1,4 @@
-import { META_API_BASE } from "@/server/modules/meta-ai/catalog";
+import { META_API_BASE, readModelApiKey } from "@/server/modules/meta-ai/catalog";
 
 export type MetaCallResult<T> =
   | {
@@ -45,8 +45,11 @@ export function wrapUntrustedDocument(text: string) {
 }
 
 export function createMetaProvider(options: MetaProviderOptions = {}) {
-  const baseUrl = (options.baseUrl || process.env.META_API_BASE_URL || META_API_BASE).replace(/\/$/, "");
-  const apiKey = options.apiKey === undefined ? process.env.MODEL_API_KEY : options.apiKey;
+  const requestedBase = (options.baseUrl || process.env.META_API_BASE_URL || META_API_BASE).replace(/\/$/, "");
+  const hostAllowed = requestedBase === META_API_BASE;
+  const baseUrl = hostAllowed ? requestedBase : META_API_BASE;
+  const rawKey = options.apiKey === undefined ? readModelApiKey() : options.apiKey;
+  const apiKey = rawKey?.trim() ?? "";
   const fetchImpl = options.fetchImpl ?? fetch;
   const timeoutMs = options.timeoutMs ?? 30_000;
   const retries = options.retries ?? 2;
@@ -60,6 +63,18 @@ export function createMetaProvider(options: MetaProviderOptions = {}) {
       latencyMs: 0,
       error: "MODEL_API_KEY is not set. Live Meta Model API calls are blocked. No other model provider is used.",
       status: null,
+    };
+  }
+
+  function misdirected<T>(model: string, endpoint: string): MetaCallResult<T> {
+    return {
+      ok: false,
+      blocked: false,
+      model,
+      endpoint,
+      latencyMs: 0,
+      status: null,
+      error: `Refusing to call a host other than ${META_API_BASE}. No substitute model provider is used.`,
     };
   }
 
@@ -111,6 +126,7 @@ export function createMetaProvider(options: MetaProviderOptions = {}) {
     async listModels(): Promise<MetaCallResult<{ ids: string[] }>> {
       const endpoint = "/models";
       if (!apiKey) return blocked("catalog", endpoint);
+      if (!hostAllowed) return misdirected("catalog", endpoint);
       try {
         const { response, latencyMs } = await request(endpoint, { method: "GET" });
         const body = await response.json().catch(() => null);
@@ -136,6 +152,7 @@ export function createMetaProvider(options: MetaProviderOptions = {}) {
     async completeChat(input: { model: string; messages: ChatMessage[]; tools?: unknown[] }): Promise<MetaCallResult<{ content: string; toolCalls: unknown[] }>> {
       const endpoint = "/chat/completions";
       if (!apiKey) return blocked(input.model, endpoint);
+      if (!hostAllowed) return misdirected(input.model, endpoint);
       const messages = [
         { role: "developer", content: UNTRUSTED_PREAMBLE },
         ...input.messages,
@@ -173,6 +190,7 @@ export function createMetaProvider(options: MetaProviderOptions = {}) {
     async respond(input: { model: string; input: string }): Promise<MetaCallResult<{ text: string }>> {
       const endpoint = "/responses";
       if (!apiKey) return blocked(input.model, endpoint);
+      if (!hostAllowed) return misdirected(input.model, endpoint);
       try {
         const { response, latencyMs } = await request(endpoint, {
           method: "POST",
@@ -191,9 +209,10 @@ export function createMetaProvider(options: MetaProviderOptions = {}) {
         return { ok: false, blocked: false, model: input.model, endpoint, latencyMs: timeoutMs, status: null, error: error instanceof Error ? error.message : "Meta request failed." };
       }
     },
-    async generateImage(input: { model: string; prompt: string }): Promise<MetaCallResult<{ outputFormat: string | null }>> {
+    async generateImage(input: { model: string; prompt: string }): Promise<MetaCallResult<{ imageCount: number }>> {
       const endpoint = "/images/generations";
       if (!apiKey) return blocked(input.model, endpoint);
+      if (!hostAllowed) return misdirected(input.model, endpoint);
       try {
         const { response, latencyMs } = await request(endpoint, {
           method: "POST",
@@ -208,6 +227,10 @@ export function createMetaProvider(options: MetaProviderOptions = {}) {
         if (!response.ok) {
           return { ok: false, blocked: false, model: input.model, endpoint, latencyMs, status: response.status, error: errorMessage(body, response.status) };
         }
+        const imageCount = countImages(body);
+        if (!imageCount) {
+          return { ok: false, blocked: false, model: input.model, endpoint, latencyMs, status: response.status, error: "Meta image response did not include an image." };
+        }
         return {
           ok: true,
           blocked: false,
@@ -215,7 +238,7 @@ export function createMetaProvider(options: MetaProviderOptions = {}) {
           endpoint,
           latencyMs,
           ...usageOf(body),
-          data: { outputFormat: body && typeof body === "object" && "output_format" in body ? String(body.output_format) : null },
+          data: { imageCount },
         };
       } catch (error) {
         return { ok: false, blocked: false, model: input.model, endpoint, latencyMs: timeoutMs, status: null, error: error instanceof Error ? error.message : "Meta request failed." };
@@ -224,6 +247,7 @@ export function createMetaProvider(options: MetaProviderOptions = {}) {
     async transcribeWav(input: { model: string; wav: Blob; filename: string }): Promise<MetaCallResult<{ transcript: string }>> {
       const endpoint = "/asr/transcribe";
       if (!apiKey) return blocked(input.model, endpoint);
+      if (!hostAllowed) return misdirected(input.model, endpoint);
       const form = new FormData();
       form.set(
         "request",
@@ -250,6 +274,15 @@ export function createMetaProvider(options: MetaProviderOptions = {}) {
       }
     },
   };
+}
+
+function countImages(body: unknown) {
+  if (!body || typeof body !== "object" || !("data" in body) || !Array.isArray(body.data)) return 0;
+  return body.data.filter((item) => {
+    if (!item || typeof item !== "object") return false;
+    const record = item as { b64_json?: unknown; url?: unknown };
+    return (typeof record.b64_json === "string" && record.b64_json.length > 0) || (typeof record.url === "string" && record.url.length > 0);
+  }).length;
 }
 
 function errorMessage(body: unknown, status: number) {

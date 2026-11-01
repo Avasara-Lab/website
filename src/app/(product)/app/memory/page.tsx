@@ -1,4 +1,4 @@
-import { Badge, PageIntro } from "@/components/app/ui";
+import { Badge, Empty, PageIntro } from "@/components/app/ui";
 import { requireOrg } from "@/server/auth/context";
 import { memorySnapshot } from "@/server/modules/read/service";
 
@@ -15,6 +15,7 @@ export default async function MemoryPage() {
       </section>
       <section>
         <h2 className="text-lg font-semibold text-navy">Counts by observed type</h2>
+        {!data.byType.length ? <div className="mt-3"><Empty title="No observed events" text="Upload a file or load the synthetic seed. Counts stay at zero until observed rows exist." /></div> : null}
         <ul className="mt-3 flex flex-wrap gap-2">
           {data.byType.map((row) => <li key={row.type}><Badge tone="blue">{row.type}: {Number(row.value)}</Badge></li>)}
         </ul>
@@ -30,6 +31,7 @@ export default async function MemoryPage() {
       </section>
       <section className="grid gap-3">
         <h2 className="text-lg font-semibold text-navy">Recent events</h2>
+        {!data.events.length ? <Empty title="No recent events" text="Observed events and interpretations for this organization show up here." /> : null}
         {data.events.map((event) => (
           <article key={event.id} className="border-b border-line py-3">
             <div className="flex flex-wrap gap-2"><Badge tone={event.provenance === "observed" ? "blue" : "orange"}>{event.provenance}</Badge><Badge>{event.type}</Badge></div>
