@@ -1,4 +1,5 @@
 import { and, desc, eq, ilike, inArray, or, sql } from "drizzle-orm";
+import { readModelApiKey } from "@/server/modules/meta-ai/catalog";
 import type { AppDatabase } from "@/server/db/client";
 import {
   agentRuns,
@@ -17,6 +18,7 @@ import {
   executionLogs,
   impactMetrics,
   ingestionJobs,
+  interpretations,
   invitations,
   notifications,
   opportunities,
@@ -116,7 +118,12 @@ export async function opportunityDetail(db: AppDatabase, organizationId: string,
     .select()
     .from(agents)
     .where(and(eq(agents.organizationId, organizationId), eq(agents.opportunityId, opportunity.id)));
-  return { opportunity, signals: signalRows, evidence, approvals: approvalRows, agents: agentRows };
+  const notes = await db
+    .select()
+    .from(interpretations)
+    .where(and(eq(interpretations.organizationId, organizationId), eq(interpretations.targetType, "opportunity"), eq(interpretations.targetId, opportunity.id)))
+    .orderBy(desc(interpretations.createdAt));
+  return { opportunity, signals: signalRows, evidence, approvals: approvalRows, agents: agentRows, interpretations: notes };
 }
 
 export async function memorySnapshot(db: AppDatabase, organizationId: string) {
@@ -189,7 +196,9 @@ export async function teamSnapshot(db: AppDatabase, organizationId: string) {
     .from(organizationMembers)
     .innerJoin(user, eq(user.id, organizationMembers.userId))
     .where(eq(organizationMembers.organizationId, organizationId));
-  const pending = await db.select().from(invitations).where(and(eq(invitations.organizationId, organizationId), sql`${invitations.acceptedAt} is null`));
+  const pendingRows = await db.select().from(invitations).where(and(eq(invitations.organizationId, organizationId), sql`${invitations.acceptedAt} is null`));
+  const now = Date.now();
+  const pending = pendingRows.map((invite) => ({ ...invite, expired: invite.expiresAt.getTime() < now }));
   return { members, pending };
 }
 
@@ -203,7 +212,7 @@ export async function settingsSnapshot(db: AppDatabase, organizationId: string) 
 export async function aiSnapshot(db: AppDatabase, organizationId: string) {
   const [config] = await db.select().from(aiConfigurations).where(eq(aiConfigurations.organizationId, organizationId)).limit(1);
   const usage = await db.select().from(aiUsageLogs).where(eq(aiUsageLogs.organizationId, organizationId)).orderBy(desc(aiUsageLogs.createdAt)).limit(20);
-  return { config, usage, keyConfigured: Boolean(process.env.MODEL_API_KEY) };
+  return { config, usage, keyConfigured: Boolean(readModelApiKey()) };
 }
 
 export async function searchWorkspace(db: AppDatabase, organizationId: string, query: string) {

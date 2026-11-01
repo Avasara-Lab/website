@@ -1,5 +1,5 @@
 import { UploadForm } from "@/components/app/client";
-import { Badge, PageIntro } from "@/components/app/ui";
+import { Badge, Empty, PageIntro } from "@/components/app/ui";
 import { requireOrg } from "@/server/auth/context";
 import { canWrite } from "@/server/domain";
 import { connectSnapshot } from "@/server/modules/read/service";
@@ -12,6 +12,7 @@ export default async function ConnectPage() {
       <PageIntro eyebrow="Business Connect" title="Bring records into this organization" text="Uploads are parsed into observed events. Third-party connectors stay unconfigured until a real integration exists." />
       {canWrite(context.role) ? <UploadForm /> : <p className="text-sm text-muted">Your role can view sources. Uploads require a manager, administrator, or owner.</p>}
       <section className="grid gap-3">
+        {!data.sources.length ? <Empty title="No data sources" text="Creating an organization adds file upload and the unconfigured connectors." /> : null}
         {data.sources.map((source) => (
           <article key={source.id} className="panel flex flex-wrap items-center justify-between gap-3 rounded-xl p-4">
             <div>

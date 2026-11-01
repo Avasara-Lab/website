@@ -49,9 +49,10 @@ export function AppShell({
       </aside>
       <div>
         <div className="flex items-center justify-between gap-3 border-b border-line bg-background px-4 py-3">
-          <form action="/app/search" className="flex-1">
+          <form action="/app/search" className="flex flex-1 gap-2">
             <label className="sr-only" htmlFor="q">Search the workspace</label>
             <input id="q" name="q" placeholder="Search signals, opportunities, events" className="min-h-10 w-full rounded-lg border border-line bg-surface px-3 text-sm" />
+            <button className="min-h-10 rounded-lg border border-line px-3 text-sm font-semibold" type="submit">Search</button>
           </form>
           <p className="hidden text-sm text-muted sm:block">{context.email}</p>
         </div>

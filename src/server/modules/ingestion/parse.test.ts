@@ -15,6 +15,46 @@ test("parsers read csv, json, and text without inventing a type", () => {
   assert.equal(text[0]?.type, "document");
 });
 
+test("json nested attributes flatten onto the record", () => {
+  const records = parseJsonRecords(JSON.stringify([
+    {
+      type: "support_conversation",
+      occurredAt: "2026-05-01T00:00:00.000Z",
+      title: "Reset",
+      body: "Password please",
+      intent: "top_level_wins",
+      attributes: {
+        intent: "password_reset",
+        approvedAnswer: "Use the account recovery page.",
+        customer: "Northwind",
+        department: "Customer Support",
+        mentionsManualReporting: true,
+      },
+      details: {
+        employee: "Priya Shah",
+        project: "Workspace Cloud",
+      },
+    },
+    {
+      type: "sales_activity",
+      body: "Follow up",
+      occurred_at: "2026-05-03T00:00:00.000Z",
+      attributes: { deal_id: "deal-9", activity_type: "call", approved_answer: "Call the buyer." },
+    },
+  ]));
+  assert.equal(records[0]?.attributes.intent, "top_level_wins");
+  assert.equal(records[0]?.attributes.approvedAnswer, "Use the account recovery page.");
+  assert.equal(records[0]?.attributes.customer, "Northwind");
+  assert.equal(records[0]?.attributes.department, "Customer Support");
+  assert.equal(records[0]?.attributes.mentionsManualReporting, true);
+  assert.equal(records[0]?.attributes.employee, "Priya Shah");
+  assert.equal(records[0]?.attributes.project, "Workspace Cloud");
+  assert.equal(records[1]?.attributes.dealId, "deal-9");
+  assert.equal(records[1]?.attributes.activityType, "call");
+  assert.equal(records[1]?.attributes.approvedAnswer, "Call the buyer.");
+  assert.deepEqual(parseJsonRecords(JSON.stringify({ records: [{ type: "document", body: "Notes", attributes: {} }] }))[0]?.attributes, {});
+});
+
 test("xlsx uses the same columns as csv", async () => {
   const workbook = new ExcelJS.Workbook();
   const sheet = workbook.addWorksheet("Records");

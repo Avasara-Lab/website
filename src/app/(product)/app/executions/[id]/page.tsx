@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { Badge, PageIntro } from "@/components/app/ui";
+import { Badge, Empty, PageIntro } from "@/components/app/ui";
 import { requireOrg } from "@/server/auth/context";
 import { runDetail } from "@/server/modules/read/service";
 
@@ -11,6 +11,7 @@ export default async function ExecutionPage({ params }: { params: Promise<{ id: 
   return (
     <>
       <PageIntro eyebrow="Execution log" title={detail.run.verificationStatus === "verified" ? "Verified run" : "Run needs review"} text={detail.run.summary || "The steps below are the record of this run."} />
+      {!detail.logs.length ? <Empty title="No log entries" text="This run has no recorded steps." /> : null}
       <ol className="grid gap-3">
         {detail.logs.map((entry) => (
           <li key={entry.id} className="panel rounded-xl p-4">

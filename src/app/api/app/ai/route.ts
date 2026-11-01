@@ -2,6 +2,7 @@ import { z } from "zod";
 import { guard, jsonError } from "@/server/http";
 import { writeAudit } from "@/server/modules/audit/service";
 import { testMetaConnection, updateAiConfig, interpretOpportunity } from "@/server/modules/meta-ai/service";
+import { opportunityDetail } from "@/server/modules/read/service";
 
 const configSchema = z.object({
   reasoningModel: z.string(),
@@ -35,8 +36,12 @@ export async function POST(request: Request) {
     const context = await guard(request, "admin");
     const body = (await request.json().catch(() => ({}))) as { action?: string; opportunityId?: string; evidence?: string };
     if (body.action === "interpret") {
-      if (!body.opportunityId || !body.evidence) return Response.json({ error: "An opportunity and evidence text are required." }, { status: 400 });
-      const result = await interpretOpportunity(context.db, context.organizationId, body.opportunityId, body.evidence.slice(0, 8000));
+      if (!body.opportunityId) return Response.json({ error: "An opportunity is required." }, { status: 400 });
+      const detail = await opportunityDetail(context.db, context.organizationId, body.opportunityId);
+      if (!detail) return Response.json({ error: "That opportunity is not in this organization." }, { status: 404 });
+      const evidence = detail.evidence.map((item) => `${item.title}\n${item.excerpt}`).join("\n\n").slice(0, 8000);
+      if (!evidence.trim()) return Response.json({ error: "This opportunity has no evidence text to interpret." }, { status: 400 });
+      const result = await interpretOpportunity(context.db, context.organizationId, body.opportunityId, evidence);
       if (!result.ok) return Response.json({ ok: false, blocked: result.blocked, error: result.error }, { status: result.blocked ? 200 : 502 });
       return Response.json({ ok: true, blocked: false, provenance: "interpretation" });
     }

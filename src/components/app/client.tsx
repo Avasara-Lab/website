@@ -3,7 +3,7 @@
 import { createAuthClient } from "better-auth/react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { META_MODELS } from "@/server/modules/meta-ai/catalog";
+import { META_CAPABILITIES, META_MODELS } from "@/server/modules/meta-ai/catalog";
 
 export const authClient = createAuthClient();
 
@@ -13,7 +13,14 @@ async function postJson(url: string, body: unknown) {
     headers: { "content-type": "application/json" },
     body: JSON.stringify(body),
   });
-  const data = (await response.json().catch(() => ({}))) as { error?: string; acceptPath?: string; models?: string[]; blocked?: boolean };
+  const data = (await response.json().catch(() => ({}))) as {
+    error?: string;
+    acceptPath?: string;
+    note?: string;
+    emailDelivery?: "sent" | "not_configured" | "failed";
+    models?: string[];
+    blocked?: boolean;
+  };
   if (!response.ok) throw new Error(data.error || "The request failed.");
   return data;
 }
@@ -194,44 +201,58 @@ export function OpportunityActions({
 export function AgentStatusButton({ agentId, status }: { agentId: string; status: string }) {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
+  const [pending, setPending] = useState(false);
   const next = status === "active" ? "paused" : "active";
   return (
     <form
       onSubmit={async (event) => {
         event.preventDefault();
+        setPending(true);
+        setError(null);
         const response = await fetch("/api/app/agents", {
           method: "PATCH",
           headers: { "content-type": "application/json" },
           body: JSON.stringify({ agentId, status: next }),
         });
         const data = (await response.json().catch(() => ({}))) as { error?: string };
+        setPending(false);
         if (!response.ok) setError(data.error || "Could not update the agent.");
         else router.refresh();
       }}
     >
-      <button className="min-h-10 rounded-lg border border-line px-3 text-sm font-semibold" type="submit">
-        {status === "active" ? "Pause agent" : "Activate agent"}
+      <button className="min-h-10 rounded-lg border border-line px-3 text-sm font-semibold" disabled={pending} type="submit">
+        {pending ? "Updating…" : status === "active" ? "Pause agent" : "Activate agent"}
       </button>
       <Message text={error} />
     </form>
   );
 }
 
-export function InviteForm() {
+export function InviteForm({ emailConfigured }: { emailConfigured: boolean }) {
+  const router = useRouter();
   const [error, setError] = useState<string | null>(null);
+  const [note, setNote] = useState<string | null>(null);
   const [path, setPath] = useState<string | null>(null);
+  const [pending, setPending] = useState(false);
   return (
     <form
       className="panel grid gap-3 rounded-xl p-5"
       onSubmit={async (event) => {
         event.preventDefault();
         setError(null);
+        setNote(null);
+        setPath(null);
+        setPending(true);
         const form = new FormData(event.currentTarget);
         try {
           const data = await postJson("/api/app/invitations", { email: String(form.get("email")), role: String(form.get("role")) });
           setPath(data.acceptPath ?? null);
+          setNote(data.note ?? null);
+          router.refresh();
         } catch (caught) {
           setError(caught instanceof Error ? caught.message : "Could not create the invitation.");
+        } finally {
+          setPending(false);
         }
       }}
     >
@@ -244,10 +265,17 @@ export function InviteForm() {
           <option value="member">Member</option>
         </select>
       </label>
-      <p className="text-xs leading-5 text-muted">Invitation email is not sent. The one-time path is returned here because Resend is not used for team invites.</p>
+      <p className="text-xs leading-5 text-muted">
+        {emailConfigured
+          ? "Resend sends the invitation from CONTACT_FROM_EMAIL when that sender and RESEND_API_KEY are set. The one-time path is still shown here."
+          : "RESEND_API_KEY or CONTACT_FROM_EMAIL is not set, so email is not sent. The one-time path is shown after you create the invitation."}
+      </p>
       <Message text={error} />
-      {path ? <p className="break-all text-sm text-navy">Share once: {path}</p> : null}
-      <button className="min-h-11 rounded-lg bg-btn px-4 text-sm font-semibold text-on-btn" type="submit">Create invitation</button>
+      {note ? <p className="text-sm text-navy">{note}</p> : null}
+      {path ? <p className="break-all text-sm text-navy">One-time path: {path}</p> : null}
+      <button className="min-h-11 rounded-lg bg-btn px-4 text-sm font-semibold text-on-btn" disabled={pending} type="submit">
+        {pending ? "Creating…" : "Create invitation"}
+      </button>
     </form>
   );
 }
@@ -311,17 +339,29 @@ export function AiConfigForm({
 }) {
   const router = useRouter();
   const [message, setMessage] = useState<string | null>(null);
+  const [pending, setPending] = useState<string | null>(null);
   return (
     <div className="grid gap-4">
       <p className={`rounded-lg px-3 py-2 text-sm ${keyConfigured ? "bg-cyan-soft text-navy" : "bg-orange-soft text-navy"}`}>
         {keyConfigured
-          ? "MODEL_API_KEY is set on the server. The key is not shown here."
-          : "Live Meta calls are blocked. Set MODEL_API_KEY on the server. No other model provider is used."}
+          ? "MODEL_API_KEY is set on the server. The key is not shown here. Calls use https://api.meta.ai/v1 only."
+          : "Live Meta calls are blocked. MODEL_API_KEY is empty. No other model provider is used."}
       </p>
+      <ul className="grid gap-3">
+        {META_CAPABILITIES.map((item) => (
+          <li key={item.key} className="panel rounded-xl p-4 text-sm">
+            <p className="font-semibold text-navy">{item.label}</p>
+            <p className="text-muted">{item.endpoint}</p>
+            <p className="mt-1 text-navy">{item.purpose}</p>
+            <p className="mt-1 text-muted">{item.note}</p>
+          </li>
+        ))}
+      </ul>
       <form
         className="panel grid gap-3 rounded-xl p-5"
         onSubmit={async (event) => {
           event.preventDefault();
+          setPending("save");
           const form = new FormData(event.currentTarget);
           const response = await fetch("/api/app/ai", {
             method: "PATCH",
@@ -335,28 +375,35 @@ export function AiConfigForm({
           });
           const data = (await response.json().catch(() => ({}))) as { error?: string };
           setMessage(response.ok ? "Model selection saved." : data.error || "Could not save.");
+          setPending(null);
           if (response.ok) router.refresh();
         }}
       >
-        <ModelSelect label="Reasoning (Muse Spark)" name="reasoningModel" values={META_MODELS.reasoning} current={reasoningModel} />
-        <ModelSelect label="Investigation (Muse Wonder or Muse Spark)" name="investigationModel" values={META_MODELS.investigation} current={investigationModel} />
-        <ModelSelect label="Transcription" name="transcribeModel" values={META_MODELS.transcribe} current={transcribeModel} />
-        <ModelSelect label="Images" name="imageModel" values={META_MODELS.image} current={imageModel} />
-        <button className="min-h-11 rounded-lg bg-btn px-4 text-sm font-semibold text-on-btn" type="submit">Save model selection</button>
+        <ModelSelect label="Reasoning (Muse Spark, chat completions)" name="reasoningModel" values={META_MODELS.reasoning} current={reasoningModel} />
+        <ModelSelect label="Investigation (Muse Wonder or Muse Spark, responses)" name="investigationModel" values={META_MODELS.investigation} current={investigationModel} />
+        <ModelSelect label="Transcription (Muse Voice, file endpoint)" name="transcribeModel" values={META_MODELS.transcribe} current={transcribeModel} />
+        <ModelSelect label="Images (Muse Image, generations)" name="imageModel" values={META_MODELS.image} current={imageModel} />
+        <p className="text-xs leading-5 text-muted">Choosing a model id that ends in -contributor opts that organization into Contributor mode for those calls.</p>
+        <button className="min-h-11 rounded-lg bg-btn px-4 text-sm font-semibold text-on-btn" disabled={Boolean(pending)} type="submit">
+          {pending === "save" ? "Saving…" : "Save model selection"}
+        </button>
       </form>
       <button
         className="min-h-11 rounded-lg border border-line px-4 text-sm font-semibold"
         type="button"
+        disabled={Boolean(pending)}
         onClick={async () => {
+          setPending("catalog");
           const response = await fetch("/api/app/ai", { method: "POST", headers: { "content-type": "application/json" }, body: "{}" });
           const data = (await response.json().catch(() => ({}))) as { error?: string; models?: string[]; blocked?: boolean };
-          if (data.blocked) setMessage(data.error || "Blocked.");
+          if (data.blocked) setMessage(data.error || "Live Meta calls are blocked.");
           else if (data.models) setMessage(`Catalog returned ${data.models.length} model ids.`);
           else setMessage(data.error || "The catalog call failed.");
+          setPending(null);
           router.refresh();
         }}
       >
-        Test Meta catalog
+        {pending === "catalog" ? "Checking…" : "Test Meta catalog"}
       </button>
       {message ? <p className="text-sm text-navy">{message}</p> : null}
     </div>
@@ -365,23 +412,38 @@ export function AiConfigForm({
 
 export function MarkNotifications({ ids }: { ids: string[] }) {
   const router = useRouter();
+  const [error, setError] = useState<string | null>(null);
+  const [pending, setPending] = useState(false);
   if (!ids.length) return null;
   return (
-    <button
-      className="min-h-10 rounded-lg border border-line px-3 text-sm font-semibold"
-      type="button"
-      onClick={async () => {
-        await postJson("/api/app/notifications", { all: true });
-        router.refresh();
-      }}
-    >
-      Mark all read
-    </button>
+    <div className="grid gap-2">
+      <button
+        className="min-h-10 w-fit rounded-lg border border-line px-3 text-sm font-semibold"
+        type="button"
+        disabled={pending}
+        onClick={async () => {
+          setPending(true);
+          setError(null);
+          try {
+            await postJson("/api/app/notifications", { all: true });
+            router.refresh();
+          } catch (caught) {
+            setError(caught instanceof Error ? caught.message : "Could not mark notifications read.");
+          } finally {
+            setPending(false);
+          }
+        }}
+      >
+        {pending ? "Updating…" : "Mark all read"}
+      </button>
+      <Message text={error} />
+    </div>
   );
 }
 
 export function OrgSwitcher({ memberships, current }: { memberships: { organizationId: string; name: string }[]; current: string }) {
   const router = useRouter();
+  const [error, setError] = useState<string | null>(null);
   if (memberships.length < 2) return null;
   return (
     <label className="grid gap-1 text-xs font-semibold tracking-wide text-muted uppercase">
@@ -390,14 +452,20 @@ export function OrgSwitcher({ memberships, current }: { memberships: { organizat
         className="min-h-10 rounded-lg border border-line bg-surface px-2 text-sm font-normal text-navy normal-case"
         value={current}
         onChange={async (event) => {
-          await postJson("/api/app/organizations/active", { organizationId: event.target.value });
-          router.refresh();
+          setError(null);
+          try {
+            await postJson("/api/app/organizations/active", { organizationId: event.target.value });
+            router.refresh();
+          } catch (caught) {
+            setError(caught instanceof Error ? caught.message : "Could not switch organization.");
+          }
         }}
       >
         {memberships.map((item) => (
           <option key={item.organizationId} value={item.organizationId}>{item.name}</option>
         ))}
       </select>
+      <Message text={error} />
     </label>
   );
 }
@@ -405,40 +473,87 @@ export function OrgSwitcher({ memberships, current }: { memberships: { organizat
 export function AcceptInvite({ token }: { token: string }) {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
+  const [pending, setPending] = useState(false);
   return (
     <form
       className="grid gap-3"
       onSubmit={async (event) => {
         event.preventDefault();
+        setPending(true);
+        setError(null);
         try {
           await postJson("/api/app/invitations/accept", { token });
           router.push("/app");
           router.refresh();
         } catch (caught) {
           setError(caught instanceof Error ? caught.message : "Could not accept the invitation.");
+          setPending(false);
         }
       }}
     >
-      <button className="min-h-11 rounded-lg bg-btn px-4 text-sm font-semibold text-on-btn" type="submit">Accept invitation</button>
+      <button className="min-h-11 rounded-lg bg-btn px-4 text-sm font-semibold text-on-btn" disabled={pending} type="submit">
+        {pending ? "Accepting…" : "Accept invitation"}
+      </button>
       <Message text={error} />
     </form>
+  );
+}
+
+export function InterpretButton({ opportunityId }: { opportunityId: string }) {
+  const router = useRouter();
+  const [message, setMessage] = useState<string | null>(null);
+  const [pending, setPending] = useState(false);
+  return (
+    <div className="grid gap-2">
+      <button
+        className="min-h-10 w-fit rounded-lg border border-line px-3 text-sm font-semibold"
+        type="button"
+        disabled={pending}
+        onClick={async () => {
+          setPending(true);
+          setMessage(null);
+          const response = await fetch("/api/app/ai", {
+            method: "POST",
+            headers: { "content-type": "application/json" },
+            body: JSON.stringify({ action: "interpret", opportunityId }),
+          });
+          const data = (await response.json().catch(() => ({}))) as { error?: string; blocked?: boolean; ok?: boolean };
+          if (data.blocked) setMessage(data.error || "Live Meta calls are blocked.");
+          else if (!response.ok || data.ok === false) setMessage(data.error || "The interpretation was not stored.");
+          else {
+            setMessage("Interpretation stored. It is labeled as an interpretation and is not evidence.");
+            router.refresh();
+          }
+          setPending(false);
+        }}
+      >
+        {pending ? "Asking Muse Spark…" : "Ask Muse Spark to interpret this evidence"}
+      </button>
+      {message ? <p className="text-sm text-navy">{message}</p> : null}
+    </div>
   );
 }
 
 export function AnalyzeButton() {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
+  const [pending, setPending] = useState(false);
   return (
     <form
       onSubmit={async (event) => {
         event.preventDefault();
+        setPending(true);
+        setError(null);
         const response = await fetch("/api/app/analyze", { method: "POST" });
         const data = (await response.json().catch(() => ({}))) as { error?: string };
+        setPending(false);
         if (!response.ok) setError(data.error || "Analysis failed.");
         else router.refresh();
       }}
     >
-      <button className="min-h-10 rounded-lg border border-line px-3 text-sm font-semibold" type="submit">Re-analyze observed events</button>
+      <button className="min-h-10 rounded-lg border border-line px-3 text-sm font-semibold" disabled={pending} type="submit">
+        {pending ? "Analyzing…" : "Re-analyze observed events"}
+      </button>
       <Message text={error} />
     </form>
   );
