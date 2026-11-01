@@ -3,7 +3,8 @@
 import { createAuthClient } from "better-auth/react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { META_CAPABILITIES, META_MODELS } from "@/server/modules/meta-ai/catalog";
+import { META_MODELS } from "@/server/modules/meta-ai/catalog";
+import { controlClass, dangerButtonClass, Notice, primaryButtonClass, secondaryButtonClass } from "@/components/app/ui";
 
 export const authClient = createAuthClient();
 
@@ -27,7 +28,20 @@ async function postJson(url: string, body: unknown) {
 
 function Message({ text }: { text: string | null }) {
   if (!text) return null;
-  return <p className="text-sm text-danger" role="alert">{text}</p>;
+  return (
+    <p className="rounded-lg bg-danger-soft px-3 py-2 text-sm leading-6 text-danger" role="alert">
+      {text}
+    </p>
+  );
+}
+
+function Success({ text }: { text: string | null }) {
+  if (!text) return null;
+  return (
+    <p className="rounded-lg bg-cyan-soft px-3 py-2 text-sm leading-6 text-navy" role="status">
+      {text}
+    </p>
+  );
 }
 
 export function AuthForm({ mode }: { mode: "login" | "register" }) {
@@ -57,11 +71,19 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
 
   return (
     <form onSubmit={onSubmit} className="panel grid max-w-md gap-4 rounded-xl p-6">
-      {mode === "register" ? <Field label="Name" name="name" required /> : null}
-      <Field label="Email" name="email" type="email" required />
-      <Field label="Password" name="password" type="password" required minLength={8} />
+      {mode === "register" ? <Field label="Name" name="name" autoComplete="name" hint="Shown to people in your organization." required /> : null}
+      <Field label="Email" name="email" type="email" autoComplete="email" hint="Use the address you registered for this workspace." required />
+      <Field
+        label="Password"
+        name="password"
+        type="password"
+        autoComplete={mode === "login" ? "current-password" : "new-password"}
+        hint="At least 8 characters."
+        required
+        minLength={8}
+      />
       <Message text={error} />
-      <button className="min-h-11 rounded-lg bg-btn px-4 text-sm font-semibold text-on-btn" disabled={pending} type="submit">
+      <button className={primaryButtonClass} disabled={pending} type="submit">
         {pending ? "Working…" : mode === "login" ? "Sign in" : "Create account"}
       </button>
     </form>
@@ -99,16 +121,17 @@ export function OnboardingForm() {
 
   return (
     <form onSubmit={onSubmit} className="panel grid max-w-xl gap-4 rounded-xl p-6">
-      <Field label="Company name" name="name" required />
-      <Field label="Industry" name="industry" />
-      <Field label="Employee count" name="employeeCount" type="number" min={1} />
-      <label className="grid gap-1 text-sm font-semibold text-navy">
+      <Field label="Company name" name="name" hint="This becomes the workspace name. Data stays inside it." required />
+      <Field label="Industry" name="industry" hint="Optional. Used as context on the company profile." />
+      <Field label="Employee count" name="employeeCount" type="number" min={1} hint="Optional." />
+      <label className="grid gap-1.5 text-sm font-medium text-navy">
         Objectives
-        <textarea name="objectives" className="min-h-24 rounded-lg border border-line bg-surface px-3 py-2 font-normal" />
+        <textarea name="objectives" className="min-h-24 rounded-lg border border-line bg-surface px-3 py-2 text-sm font-normal" />
+        <span className="text-xs leading-5 font-normal text-muted">What this workspace should pay attention to. You can edit it later in Settings.</span>
       </label>
-      <Field label="Departments, comma separated" name="departments" placeholder="Sales, Customer Support, Operations" />
+      <Field label="Departments" name="departments" placeholder="Sales, Customer Support, Operations" hint="Comma separated. Used when opportunities are grouped." />
       <Message text={error} />
-      <button className="min-h-11 rounded-lg bg-btn px-4 text-sm font-semibold text-on-btn" disabled={pending} type="submit">
+      <button className={primaryButtonClass} disabled={pending} type="submit">
         {pending ? "Creating…" : "Create organization"}
       </button>
     </form>
@@ -134,20 +157,21 @@ export function UploadForm() {
       setError(data.error || "Upload failed.");
       return;
     }
-    setNote(data.status === "failed" ? data.error || "Processing failed." : `Processing status: ${data.status}.`);
+    if (data.status === "failed") setError(data.error || "Processing failed.");
+    else setNote(data.status ? `Processing status: ${data.status}.` : "Upload received.");
     router.refresh();
   }
 
   return (
     <form onSubmit={onSubmit} className="panel grid gap-3 rounded-xl p-5">
-      <label className="grid gap-1 text-sm font-semibold text-navy">
+      <label className="grid gap-1.5 text-sm font-medium text-navy" htmlFor="business-file">
         Business file
-        <input name="file" type="file" required accept=".csv,.xlsx,.json,.txt,.md,.pdf,.wav" className="font-normal" />
+        <input id="business-file" name="file" type="file" required accept=".csv,.xlsx,.json,.txt,.md,.pdf,.wav" className="text-sm font-normal" />
       </label>
       <p className="text-xs leading-5 text-muted">CSV, XLSX, JSON, TXT, Markdown, PDF, or WAV. Maximum 10 MB. A duplicate file for this organization is rejected.</p>
       <Message text={error} />
-      {note ? <p className="text-sm text-navy">{note}</p> : null}
-      <button className="min-h-11 rounded-lg bg-btn px-4 text-sm font-semibold text-on-btn" disabled={pending} type="submit">
+      <Success text={note} />
+      <button className={primaryButtonClass} disabled={pending} type="submit">
         {pending ? "Processing…" : "Upload and process"}
       </button>
     </form>
@@ -159,16 +183,19 @@ export function OpportunityActions({
   status,
   executable,
   canAct,
+  layout = "row",
 }: {
   opportunityId: string;
   status: string;
   executable: boolean;
   canAct: boolean;
+  layout?: "row" | "stack";
 }) {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState<string | null>(null);
   const open = ["NEW", "INVESTIGATING", "READY_FOR_APPROVAL"].includes(status);
+  const stacked = layout === "stack";
 
   async function run(action: string, url = `/api/app/opportunities/${opportunityId}`) {
     setPending(action);
@@ -183,16 +210,16 @@ export function OpportunityActions({
     }
   }
 
-  if (!canAct) return <p className="text-sm text-muted">Members can review this opportunity. Approval and execution stay with owners, administrators, and managers.</p>;
+  if (!canAct) return <p className="text-sm leading-6 text-muted">Members can review this opportunity. Approval and execution stay with owners, administrators, and managers.</p>;
 
   return (
-    <div className="flex flex-wrap gap-2">
-      {status === "NEW" ? <Action label="Mark investigating" pending={pending} onClick={() => run("investigate")} /> : null}
-      {status === "NEW" || status === "INVESTIGATING" ? <Action label="Mark ready for approval" pending={pending} onClick={() => run("ready")} /> : null}
-      {open ? <Action label="Approve" pending={pending} onClick={() => run("approve")} /> : null}
-      {open ? <Action label="Reject" pending={pending} onClick={() => run("reject")} /> : null}
-      {executable ? <Action label="Create support agent" pending={pending} onClick={() => run("create-agent", "/api/app/agents")} /> : <p className="text-sm text-muted">No executor is configured for this recommendation.</p>}
-      {executable && (status === "APPROVED" || status === "FAILED") ? <Action label="Execute simulated workflow" pending={pending} onClick={() => run("execute", "/api/app/execute")} /> : null}
+    <div className={stacked ? "grid gap-2" : "flex flex-wrap items-center gap-2"}>
+      {status === "NEW" ? <Action label="Mark investigating" pending={pending} block={stacked} onClick={() => run("investigate")} /> : null}
+      {status === "NEW" || status === "INVESTIGATING" ? <Action label="Mark ready for approval" pending={pending} block={stacked} onClick={() => run("ready")} /> : null}
+      {open ? <Action label="Approve" tone="primary" pending={pending} block={stacked} onClick={() => run("approve")} /> : null}
+      {open ? <Action label="Reject" tone="danger" pending={pending} block={stacked} onClick={() => run("reject")} /> : null}
+      {executable ? <Action label="Create support agent" pending={pending} block={stacked} onClick={() => run("create-agent", "/api/app/agents")} /> : <p className="text-sm leading-6 text-muted">No executor is configured for this recommendation.</p>}
+      {executable && (status === "APPROVED" || status === "FAILED") ? <Action label="Execute simulated workflow" tone="primary" pending={pending} block={stacked} onClick={() => run("execute", "/api/app/execute")} /> : null}
       <Message text={error} />
     </div>
   );
@@ -205,6 +232,7 @@ export function AgentStatusButton({ agentId, status }: { agentId: string; status
   const next = status === "active" ? "paused" : "active";
   return (
     <form
+      className="grid gap-2"
       onSubmit={async (event) => {
         event.preventDefault();
         setPending(true);
@@ -220,7 +248,7 @@ export function AgentStatusButton({ agentId, status }: { agentId: string; status
         else router.refresh();
       }}
     >
-      <button className="min-h-10 rounded-lg border border-line px-3 text-sm font-semibold" disabled={pending} type="submit">
+      <button className={secondaryButtonClass} disabled={pending} type="submit">
         {pending ? "Updating…" : status === "active" ? "Pause agent" : "Activate agent"}
       </button>
       <Message text={error} />
@@ -250,20 +278,22 @@ export function InviteForm({ emailConfigured }: { emailConfigured: boolean }) {
           setNote(data.note ?? null);
           router.refresh();
         } catch (caught) {
+          setPath(null);
           setError(caught instanceof Error ? caught.message : "Could not create the invitation.");
         } finally {
           setPending(false);
         }
       }}
     >
-      <Field label="Email" name="email" type="email" required />
-      <label className="grid gap-1 text-sm font-semibold text-navy">
+      <Field label="Email" name="email" type="email" autoComplete="email" hint="The person must sign in with this address to accept." required />
+      <label className="grid gap-1.5 text-sm font-medium text-navy" htmlFor="invite-role">
         Role
-        <select name="role" className="min-h-11 rounded-lg border border-line bg-surface px-3 font-normal" defaultValue="member">
+        <select id="invite-role" name="role" className={controlClass} defaultValue="member">
           <option value="administrator">Administrator</option>
           <option value="manager">Manager</option>
           <option value="member">Member</option>
         </select>
+        <span className="text-xs leading-5 font-normal text-muted">Managers can approve and execute. Members can read. Owners are not invited from this form.</span>
       </label>
       <p className="text-xs leading-5 text-muted">
         {emailConfigured
@@ -271,11 +301,17 @@ export function InviteForm({ emailConfigured }: { emailConfigured: boolean }) {
           : "RESEND_API_KEY or CONTACT_FROM_EMAIL is not set, so email is not sent. The one-time path is shown after you create the invitation."}
       </p>
       <Message text={error} />
-      {note ? <p className="text-sm text-navy">{note}</p> : null}
-      {path ? <p className="break-all text-sm text-navy">One-time path: {path}</p> : null}
-      <button className="min-h-11 rounded-lg bg-btn px-4 text-sm font-semibold text-on-btn" disabled={pending} type="submit">
-        {pending ? "Creating…" : "Create invitation"}
-      </button>
+      {note ? (
+        <p className="rounded-lg bg-cyan-soft px-3 py-2 text-sm leading-6 text-navy" role="status">
+          {note}
+        </p>
+      ) : null}
+      {path ? (
+        <p className="break-all rounded-lg bg-paper px-3 py-2 text-sm leading-6 text-navy">
+          One-time path: <span className="font-medium">{path}</span>
+        </p>
+      ) : null}
+      <button className={primaryButtonClass} disabled={pending} type="submit">{pending ? "Creating…" : "Create invitation"}</button>
     </form>
   );
 }
@@ -284,12 +320,14 @@ export function ProfileForm({ companyName, industry, employeeCount, objectives }
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
+  const [pending, setPending] = useState(false);
   return (
     <form
       className="panel grid gap-3 rounded-xl p-5"
       onSubmit={async (event) => {
         event.preventDefault();
         setSaved(false);
+        setPending(true);
         const form = new FormData(event.currentTarget);
         const response = await fetch("/api/app/profile", {
           method: "PATCH",
@@ -302,6 +340,7 @@ export function ProfileForm({ companyName, industry, employeeCount, objectives }
           }),
         });
         const data = (await response.json().catch(() => ({}))) as { error?: string };
+        setPending(false);
         if (!response.ok) setError(data.error || "Could not save the profile.");
         else {
           setError(null);
@@ -310,16 +349,16 @@ export function ProfileForm({ companyName, industry, employeeCount, objectives }
         }
       }}
     >
-      <Field label="Company name" name="companyName" defaultValue={companyName} required />
+      <Field label="Company name" name="companyName" defaultValue={companyName} hint="Also updates the workspace name in the sidebar." required />
       <Field label="Industry" name="industry" defaultValue={industry} />
       <Field label="Employee count" name="employeeCount" type="number" defaultValue={employeeCount ? String(employeeCount) : ""} />
-      <label className="grid gap-1 text-sm font-semibold text-navy">
+      <label className="grid gap-1.5 text-sm font-medium text-navy" htmlFor="objectives">
         Objectives
-        <textarea name="objectives" defaultValue={objectives} className="min-h-24 rounded-lg border border-line bg-surface px-3 py-2 font-normal" />
+        <textarea id="objectives" name="objectives" defaultValue={objectives} className="min-h-24 rounded-lg border border-line bg-surface px-3 py-2 text-sm font-normal" />
       </label>
       <Message text={error} />
-      {saved ? <p className="text-sm text-navy">Profile saved.</p> : null}
-      <button className="min-h-11 rounded-lg bg-btn px-4 text-sm font-semibold text-on-btn" type="submit">Save profile</button>
+      {saved ? <Success text="Profile saved for this organization." /> : null}
+      <button className={primaryButtonClass} disabled={pending} type="submit">{pending ? "Saving…" : "Save profile"}</button>
     </form>
   );
 }
@@ -338,25 +377,15 @@ export function AiConfigForm({
   keyConfigured: boolean;
 }) {
   const router = useRouter();
-  const [message, setMessage] = useState<string | null>(null);
+  const [message, setMessage] = useState<{ tone: "ok" | "warning" | "error"; text: string } | null>(null);
   const [pending, setPending] = useState<string | null>(null);
   return (
     <div className="grid gap-4">
-      <p className={`rounded-lg px-3 py-2 text-sm ${keyConfigured ? "bg-cyan-soft text-navy" : "bg-orange-soft text-navy"}`}>
+      <Notice tone={keyConfigured ? "info" : "warning"} title={keyConfigured ? "Server key is set" : "Live Meta calls are paused"}>
         {keyConfigured
           ? "MODEL_API_KEY is set on the server. The key is not shown here. Calls use https://api.meta.ai/v1 only."
           : "Live Meta calls are blocked. MODEL_API_KEY is empty. No other model provider is used."}
-      </p>
-      <ul className="grid gap-3">
-        {META_CAPABILITIES.map((item) => (
-          <li key={item.key} className="panel rounded-xl p-4 text-sm">
-            <p className="font-semibold text-navy">{item.label}</p>
-            <p className="text-muted">{item.endpoint}</p>
-            <p className="mt-1 text-navy">{item.purpose}</p>
-            <p className="mt-1 text-muted">{item.note}</p>
-          </li>
-        ))}
-      </ul>
+      </Notice>
       <form
         className="panel grid gap-3 rounded-xl p-5"
         onSubmit={async (event) => {
@@ -374,38 +403,38 @@ export function AiConfigForm({
             }),
           });
           const data = (await response.json().catch(() => ({}))) as { error?: string };
-          setMessage(response.ok ? "Model selection saved." : data.error || "Could not save.");
           setPending(null);
+          setMessage(response.ok ? { tone: "ok", text: "Model selection saved." } : { tone: "error", text: data.error || "Could not save." });
           if (response.ok) router.refresh();
         }}
       >
-        <ModelSelect label="Reasoning (Muse Spark, chat completions)" name="reasoningModel" values={META_MODELS.reasoning} current={reasoningModel} />
-        <ModelSelect label="Investigation (Muse Wonder or Muse Spark, responses)" name="investigationModel" values={META_MODELS.investigation} current={investigationModel} />
-        <ModelSelect label="Transcription (Muse Voice, file endpoint)" name="transcribeModel" values={META_MODELS.transcribe} current={transcribeModel} />
+        <ModelSelect label="Reasoning (Muse Spark, chat completions)" name="reasoningModel" hint="Used when a live reasoning call is allowed." values={META_MODELS.reasoning} current={reasoningModel} />
+        <ModelSelect label="Investigation (Muse Wonder or Muse Spark, responses)" name="investigationModel" hint="Muse Wonder or Muse Spark." values={META_MODELS.investigation} current={investigationModel} />
+        <ModelSelect label="Transcription (Muse Voice, file endpoint)" name="transcribeModel" hint="Used for WAV uploads when the server key is set." values={META_MODELS.transcribe} current={transcribeModel} />
         <ModelSelect label="Images (Muse Image, generations)" name="imageModel" values={META_MODELS.image} current={imageModel} />
         <p className="text-xs leading-5 text-muted">Choosing a model id that ends in -contributor opts that organization into Contributor mode for those calls.</p>
-        <button className="min-h-11 rounded-lg bg-btn px-4 text-sm font-semibold text-on-btn" disabled={Boolean(pending)} type="submit">
-          {pending === "save" ? "Saving…" : "Save model selection"}
-        </button>
+        <button className={primaryButtonClass} disabled={Boolean(pending)} type="submit">{pending === "save" ? "Saving…" : "Save model selection"}</button>
       </form>
       <button
-        className="min-h-11 rounded-lg border border-line px-4 text-sm font-semibold"
+        className={secondaryButtonClass}
         type="button"
         disabled={Boolean(pending)}
         onClick={async () => {
           setPending("catalog");
           const response = await fetch("/api/app/ai", { method: "POST", headers: { "content-type": "application/json" }, body: "{}" });
           const data = (await response.json().catch(() => ({}))) as { error?: string; models?: string[]; blocked?: boolean };
-          if (data.blocked) setMessage(data.error || "Live Meta calls are blocked.");
-          else if (data.models) setMessage(`Catalog returned ${data.models.length} model ids.`);
-          else setMessage(data.error || "The catalog call failed.");
+          if (data.blocked) setMessage({ tone: "warning", text: data.error || "Live Meta calls are blocked." });
+          else if (data.models) setMessage({ tone: "ok", text: `Catalog returned ${data.models.length} model ids.` });
+          else setMessage({ tone: "error", text: data.error || "The catalog call failed." });
           setPending(null);
           router.refresh();
         }}
       >
         {pending === "catalog" ? "Checking…" : "Test Meta catalog"}
       </button>
-      {message ? <p className="text-sm text-navy">{message}</p> : null}
+      {message?.tone === "ok" ? <Success text={message.text} /> : null}
+      {message?.tone === "warning" ? <Notice tone="warning">{message.text}</Notice> : null}
+      {message?.tone === "error" ? <Message text={message.text} /> : null}
     </div>
   );
 }
@@ -418,7 +447,7 @@ export function MarkNotifications({ ids }: { ids: string[] }) {
   return (
     <div className="grid gap-2">
       <button
-        className="min-h-10 w-fit rounded-lg border border-line px-3 text-sm font-semibold"
+        className={`${secondaryButtonClass} w-fit`}
         type="button"
         disabled={pending}
         onClick={async () => {
@@ -446,10 +475,11 @@ export function OrgSwitcher({ memberships, current }: { memberships: { organizat
   const [error, setError] = useState<string | null>(null);
   if (memberships.length < 2) return null;
   return (
-    <label className="grid gap-1 text-xs font-semibold tracking-wide text-muted uppercase">
+    <label className="grid gap-1.5 text-xs font-medium text-muted" htmlFor="active-organization">
       Organization
       <select
-        className="min-h-10 rounded-lg border border-line bg-surface px-2 text-sm font-normal text-navy normal-case"
+        id="active-organization"
+        className={controlClass}
         value={current}
         onChange={async (event) => {
           setError(null);
@@ -491,9 +521,8 @@ export function AcceptInvite({ token }: { token: string }) {
         }
       }}
     >
-      <button className="min-h-11 rounded-lg bg-btn px-4 text-sm font-semibold text-on-btn" disabled={pending} type="submit">
-        {pending ? "Accepting…" : "Accept invitation"}
-      </button>
+      <p className="text-xs leading-5 text-muted">Accepting adds you only to the invited organization.</p>
+      <button className={primaryButtonClass} disabled={pending} type="submit">{pending ? "Accepting…" : "Accept invitation"}</button>
       <Message text={error} />
     </form>
   );
@@ -506,7 +535,7 @@ export function InterpretButton({ opportunityId }: { opportunityId: string }) {
   return (
     <div className="grid gap-2">
       <button
-        className="min-h-10 w-fit rounded-lg border border-line px-3 text-sm font-semibold"
+        className={`${secondaryButtonClass} w-fit`}
         type="button"
         disabled={pending}
         onClick={async () => {
@@ -540,6 +569,7 @@ export function AnalyzeButton() {
   const [pending, setPending] = useState(false);
   return (
     <form
+      className="grid gap-2"
       onSubmit={async (event) => {
         event.preventDefault();
         setPending(true);
@@ -551,40 +581,99 @@ export function AnalyzeButton() {
         else router.refresh();
       }}
     >
-      <button className="min-h-10 rounded-lg border border-line px-3 text-sm font-semibold" disabled={pending} type="submit">
-        {pending ? "Analyzing…" : "Re-analyze observed events"}
-      </button>
+      <button className={secondaryButtonClass} disabled={pending} type="submit">{pending ? "Analyzing…" : "Re-analyze observed events"}</button>
       <Message text={error} />
     </form>
   );
 }
 
-function Action({ label, onClick, pending }: { label: string; onClick: () => void; pending: string | null }) {
+function Action({
+  label,
+  onClick,
+  pending,
+  tone = "secondary",
+  block = false,
+}: {
+  label: string;
+  onClick: () => void;
+  pending: string | null;
+  tone?: "primary" | "secondary" | "danger";
+  block?: boolean;
+}) {
+  const toneClass = tone === "primary" ? primaryButtonClass : tone === "danger" ? dangerButtonClass : secondaryButtonClass;
   return (
-    <button className="min-h-10 rounded-lg border border-line px-3 text-sm font-semibold" type="button" disabled={Boolean(pending)} onClick={onClick}>
+    <button className={`${toneClass} ${block ? "w-full" : ""}`} type="button" disabled={Boolean(pending)} onClick={onClick}>
       {pending ? "Working…" : label}
     </button>
   );
 }
 
-function Field({ label, name, type = "text", required, defaultValue, placeholder, min, minLength }: { label: string; name: string; type?: string; required?: boolean; defaultValue?: string; placeholder?: string; min?: number; minLength?: number }) {
+function Field({
+  label,
+  name,
+  type = "text",
+  required,
+  defaultValue,
+  placeholder,
+  min,
+  minLength,
+  hint,
+  autoComplete,
+}: {
+  label: string;
+  name: string;
+  type?: string;
+  required?: boolean;
+  defaultValue?: string;
+  placeholder?: string;
+  min?: number;
+  minLength?: number;
+  hint?: string;
+  autoComplete?: string;
+}) {
+  const id = name;
   return (
-    <label className="grid gap-1 text-sm font-semibold text-navy">
+    <label className="grid gap-1.5 text-sm font-medium text-navy" htmlFor={id}>
       {label}
-      <input name={name} type={type} required={required} defaultValue={defaultValue} placeholder={placeholder} min={min} minLength={minLength} className="min-h-11 rounded-lg border border-line bg-surface px-3 font-normal" />
+      <input
+        id={id}
+        name={name}
+        type={type}
+        required={required}
+        defaultValue={defaultValue}
+        placeholder={placeholder}
+        min={min}
+        minLength={minLength}
+        autoComplete={autoComplete}
+        className={controlClass}
+      />
+      {hint ? <span className="text-xs leading-5 font-normal text-muted">{hint}</span> : null}
     </label>
   );
 }
 
-function ModelSelect({ label, name, values, current }: { label: string; name: string; values: readonly string[]; current: string }) {
+function ModelSelect({
+  label,
+  name,
+  values,
+  current,
+  hint,
+}: {
+  label: string;
+  name: string;
+  values: readonly string[];
+  current: string;
+  hint?: string;
+}) {
   return (
-    <label className="grid gap-1 text-sm font-semibold text-navy">
+    <label className="grid gap-1.5 text-sm font-medium text-navy" htmlFor={name}>
       {label}
-      <select name={name} defaultValue={current || values[0]} className="min-h-11 rounded-lg border border-line bg-surface px-3 font-normal">
+      <select id={name} name={name} defaultValue={current || values[0]} className={controlClass}>
         {values.map((value) => (
           <option key={value} value={value}>{value}</option>
         ))}
       </select>
+      {hint ? <span className="text-xs leading-5 font-normal text-muted">{hint}</span> : null}
     </label>
   );
 }

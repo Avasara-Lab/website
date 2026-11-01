@@ -1,4 +1,5 @@
-import { Badge, Empty, PageIntro } from "@/components/app/ui";
+import { DataTable, Empty, PageIntro, StatusBadge, tdClass, thClass } from "@/components/app/ui";
+import { formatWhen } from "@/lib/app-labels";
 import { requireOrg } from "@/server/auth/context";
 import { connectSnapshot } from "@/server/modules/read/service";
 
@@ -7,38 +8,61 @@ export default async function SourcesPage() {
   const data = await connectSnapshot(context.db, context.organizationId);
   return (
     <>
-      <PageIntro eyebrow="Data sources" title="Ingestion history" text="Each upload keeps its name, hash, status, record count, and the job that processed it." />
-      {!data.files.length ? <Empty title="No files yet" text="Upload a file from Business Connect. The synthetic demo seed also appears here when it is loaded." /> : null}
-      <div className="overflow-x-auto">
-        <table className="w-full min-w-[720px] text-left text-sm">
-          <thead className="text-xs tracking-wide text-muted uppercase">
+      <PageIntro
+        eyebrow="Data sources"
+        title="Ingestion history"
+        text="Each upload keeps its name, status, record count, and the job that processed it. Files appear here after you upload them from Business Connect."
+      />
+      {!data.files.length ? (
+        <Empty
+          title="No files yet"
+          text="Upload a file from Business Connect. The synthetic demo seed also appears here when it is loaded as a file."
+          action={{ href: "/app/connect", label: "Upload a file" }}
+        />
+      ) : (
+        <DataTable caption="Uploaded files and ingestion jobs">
+          <thead>
             <tr>
-              <th className="py-2">File</th>
-              <th>Status</th>
-              <th>Records</th>
-              <th>Job</th>
-              <th>Error</th>
+              <th className={thClass}>File</th>
+              <th className={thClass}>Status</th>
+              <th className={thClass}>Records</th>
+              <th className={thClass}>Job</th>
+              <th className={thClass}>Error</th>
             </tr>
           </thead>
           <tbody>
             {data.files.map((file) => {
               const job = data.jobs.find((item) => item.uploadedFileId === file.id);
+              const error = file.error || job?.error || "";
               return (
-                <tr key={file.id} className="border-t border-line">
-                  <td className="py-3 pr-3">
-                    <p className="font-semibold text-navy">{file.originalName}</p>
-                    <p className="text-xs text-muted">{file.createdAt.toISOString()} · {file.byteSize} bytes</p>
+                <tr key={file.id} className="hover:bg-paper">
+                  <td className={tdClass}>
+                    <p className="font-semibold">{file.originalName}</p>
+                    <p className="mt-1 text-xs text-muted">
+                      {formatWhen(file.createdAt, true)} · {file.byteSize.toLocaleString("en-US")} bytes
+                    </p>
                   </td>
-                  <td><Badge>{file.status}</Badge></td>
-                  <td>{file.recordCount}</td>
-                  <td>{job ? `${job.status} · read ${job.recordsRead} · wrote ${job.recordsWritten}` : "—"}</td>
-                  <td className="max-w-xs text-danger">{file.error || job?.error || ""}</td>
+                  <td className={tdClass}>
+                    <StatusBadge value={file.status} />
+                  </td>
+                  <td className={`${tdClass} tabular-nums`}>{file.recordCount}</td>
+                  <td className={tdClass}>
+                    {job ? (
+                      <span className="inline-flex flex-wrap items-center gap-2">
+                        <StatusBadge value={job.status} />
+                        <span className="text-muted">read {job.recordsRead} · wrote {job.recordsWritten}</span>
+                      </span>
+                    ) : (
+                      <span className="text-muted">No job recorded</span>
+                    )}
+                  </td>
+                  <td className={`${tdClass} max-w-xs text-danger`}>{error || <span className="text-muted">None</span>}</td>
                 </tr>
               );
             })}
           </tbody>
-        </table>
-      </div>
+        </DataTable>
+      )}
     </>
   );
 }
