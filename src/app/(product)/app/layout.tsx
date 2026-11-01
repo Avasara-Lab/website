@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import { OnboardingForm } from "@/components/app/client";
 import { AppShell } from "@/components/app/shell";
+import { PageIntro } from "@/components/app/ui";
 import { listMemberships, readSession } from "@/server/auth/context";
 import { requireOrg } from "@/server/auth/context";
 import { getDb } from "@/server/db/client";
@@ -22,11 +23,11 @@ async function Workspace({ children }: { children: React.ReactNode }) {
   if (!memberships.length) {
     return (
       <main id="content" className="mx-auto grid w-full max-w-3xl gap-6 px-5 py-12">
-        <header>
-          <p className="text-xs font-semibold tracking-[0.16em] text-cyan uppercase">Organization</p>
-          <h1 className="mt-2 text-3xl font-semibold text-navy">Create your company workspace</h1>
-          <p className="mt-3 text-sm leading-6 text-muted">Data stays inside the organization you create. You will be the owner.</p>
-        </header>
+        <PageIntro
+          eyebrow="Organization"
+          title="Create your company workspace"
+          text="Data stays inside the organization you create. You will be the owner. You can invite other people after the workspace exists."
+        />
         <OnboardingForm />
       </main>
     );

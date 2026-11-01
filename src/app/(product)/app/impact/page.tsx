@@ -1,4 +1,5 @@
-import { Badge, Empty, PageIntro } from "@/components/app/ui";
+import { Empty, PageIntro, StatusBadge } from "@/components/app/ui";
+import { labelize } from "@/lib/app-labels";
 import { requireOrg } from "@/server/auth/context";
 import { buildImpact } from "@/server/modules/impact/service";
 
@@ -10,21 +11,51 @@ export default async function ImpactPage() {
       <PageIntro
         eyebrow="Impact intelligence"
         title="What changed, and how sure we are"
-        text="Each figure has a classification. Simulated means the support inbox was not a live customer channel. Estimate means the minutes use an assumption. Verified means the reply text matched an observed approved answer."
+        text="Every figure keeps its classification. Observed is a stored count. Estimate uses a stated assumption. Simulated means the support inbox was not a live customer channel. Verified means the reply matched an observed approved answer."
       />
-      {snapshot.synthetic ? <p className="rounded-lg bg-orange-soft px-3 py-2 text-sm text-navy">These numbers belong to a synthetic company. They are not customer achievements.</p> : null}
-      {!snapshot.metrics.length ? <Empty title="No impact yet" text="Ingest events to see observed counts. Verified and simulated rows appear after an agent run." /> : null}
-      <div className="grid gap-3 md:grid-cols-2">
-        {snapshot.metrics.map((metric) => (
-          <article key={metric.metricKey} className="panel rounded-xl p-5">
-            <Badge tone={metric.classification === "verified" ? "blue" : metric.classification === "estimate" || metric.classification === "simulated" ? "orange" : "neutral"}>{metric.classification}</Badge>
-            <h2 className="mt-3 text-lg font-semibold text-navy">{metric.label}</h2>
-            <p className="mt-2 text-3xl font-semibold text-navy">{metric.unit === "ratio" ? `${Math.round(metric.value * 100)}%` : metric.value}</p>
-            <p className="text-xs text-muted">{metric.unit}</p>
-            {"note" in metric.details && metric.details.note ? <p className="mt-2 text-sm leading-6 text-muted">{String(metric.details.note)}</p> : null}
-          </article>
-        ))}
-      </div>
+      {!snapshot.metrics.length ? (
+        <Empty
+          title="No impact yet"
+          text="Ingest events to see observed counts. Verified and simulated rows appear after an agent run."
+          action={{ href: "/app/connect", label: "Upload records" }}
+        />
+      ) : (
+        <div className="grid gap-3 md:grid-cols-2">
+          {snapshot.metrics.map((metric) => {
+            const note = detailNote(metric.details);
+            return (
+              <article key={metric.metricKey} className="panel flex flex-col rounded-xl p-5">
+                <div className="flex items-start justify-between gap-3">
+                  <h2 className="text-base font-semibold text-navy">{metric.label}</h2>
+                  <StatusBadge value={metric.classification} />
+                </div>
+                <p className="mt-3 text-3xl font-semibold tracking-tight text-navy tabular-nums">
+                  {metric.unit === "ratio" ? `${Math.round(metric.value * 100)}%` : metric.value}
+                  <span className="ml-2 text-sm font-medium text-muted">{unitCaption(metric.unit)}</span>
+                </p>
+                {note ? <p className="mt-2 text-sm leading-6 text-muted">{note}</p> : null}
+              </article>
+            );
+          })}
+        </div>
+      )}
     </>
   );
+}
+
+function unitCaption(unit: string) {
+  if (unit === "ratio") return "of recorded runs";
+  return unit;
+}
+
+function detailNote(details: Record<string, unknown>) {
+  const parts: string[] = [];
+  if (typeof details.note === "string" && details.note) parts.push(details.note);
+  if (typeof details.rule === "string" && details.rule) parts.push(`Rule: ${details.rule}`);
+  if (typeof details.runs === "number" && typeof details.verified === "number") {
+    parts.push(`${details.verified} verified of ${details.runs} recorded runs.`);
+  }
+  if (typeof details.detection === "string") parts.push(`Detection: ${details.detection}.`);
+  if (typeof details.channel === "string") parts.push(`Channel: ${labelize(details.channel)}.`);
+  return parts.join(" ");
 }
