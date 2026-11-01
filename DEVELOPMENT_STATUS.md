@@ -29,7 +29,16 @@ Updated 1 November 2026.
 
 - Live Meta calls. `MODEL_API_KEY` is not set in this environment. The AI page reports that, and a catalog test returns `blocked: true`. No substitute provider is wired.
 
+## Deploy
+
+- Marketing pages and `POST /api/contact` can run on Hostinger Node.js hosting without `DATABASE_URL`.
+- `/app` needs PostgreSQL. Hostinger Web and Cloud plans provide MySQL and write a `mysql://` `DATABASE_URL` if you use their website database setup. This app cannot use that URL. Use external managed PostgreSQL, or PostgreSQL you operate on a VPS. Steps are in `README.md`.
+- `npm run db:migrate` applies `drizzle/` and is not part of `npm run build` or the Hostinger start command. Run it against the target database before using `/app`.
+- `npm run db:seed` is for non-production databases. It creates `founder@avasara-demo.test` with a password that is in the repository.
+- `MODEL_API_KEY`, Redis, and R2 stay optional. Missing `MODEL_API_KEY` blocks live model calls. Hostinger’s Node process does not start `npm run worker`.
+
 ## Not claimed
 
 - No customer metrics, connected CRM, or live support channel.
 - Feedback Intelligence is still the synthetic marketing demo.
+- A live customer workspace. The deploy notes describe how to run the application.

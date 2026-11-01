@@ -67,6 +67,16 @@ If `MODEL_API_KEY` is missing, the provider returns a blocked result and does no
 - Otherwise files are stored under `.data/uploads`, which is gitignored.
 - Queue: BullMQ on `REDIS_URL` when `INGESTION_MODE=queue`. Run `npm run worker`.
 
+## Production
+
+Marketing routes and `POST /api/contact` do not open PostgreSQL. `/app`, `/api/auth`, and `/api/app` do. They read `DATABASE_URL` through `src/server/db/client.ts` and refuse to start auth without `BETTER_AUTH_SECRET`. `BETTER_AUTH_URL` is the cookie origin and the only trusted origin.
+
+Hostinger Web and Cloud hosting provide MySQL. Their Node.js database setup writes a `mysql://` `DATABASE_URL`. This schema is PostgreSQL. Hostinger’s database support article, updated 29 October 2026, places PostgreSQL and Redis on VPS hosting, not on Web or Cloud. A full product deploy therefore uses PostgreSQL the Node process can reach: an external managed database, or PostgreSQL operated on a VPS. Deploy steps, the seed rule, and the smoke checklist are in `README.md`.
+
+`npm run build` does not apply `drizzle/`. Run `scripts/migrate.ts` with `DATABASE_URL` set to the target database before `/app` is used. `npm run db:seed` loads a synthetic company and a password that is in this repository. Keep that command off production databases.
+
+Inline ingestion is the production default on a host that only starts `next start`. Queue mode needs `REDIS_URL` and a separate `npm run worker` process. Disk uploads under `.data/uploads` are replaced when the app is redeployed. R2 is the durable store when those four variables are set. A missing `MODEL_API_KEY` blocks live model calls.
+
 ## Deletion
 
 Deleting an organization cascades tenant rows. Deleting a user cascades memberships and sessions. Audit rows keep a null user id when the account is removed (`ON DELETE SET NULL`).
