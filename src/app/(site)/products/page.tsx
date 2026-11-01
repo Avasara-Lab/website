@@ -6,7 +6,7 @@ import { pageMetadata } from "@/lib/site";
 export const metadata = pageMetadata({
   title: "Products",
   description:
-    "Feedback Intelligence is an early Avasara Lab direction with a synthetic demo. Opportunity Intelligence is a longer-term vision, not a finished platform.",
+    "Feedback Intelligence remains a synthetic demo. Opportunity Intelligence is an application you can register for. It does not publish customer results.",
   path: "/products",
 });
 
@@ -37,11 +37,16 @@ export default function ProductsPage() {
             </div>
           </article>
           <article className="rounded-xl border border-line bg-inverse p-7 text-on-inverse">
-            <p className="text-xs font-semibold tracking-[0.14em] text-orange uppercase">Longer-term vision</p>
+            <p className="text-xs font-semibold tracking-[0.14em] text-orange uppercase">Application</p>
             <h2 className="mt-3 text-4xl font-semibold">Opportunity Intelligence</h2>
             <p className="mt-4 text-sm leading-6 text-on-inverse/75">
-              The longer aim is a system that connects signals, opportunities, and the workflow that follows. Today that work happens as a scoped engagement, not as a product you can log into.
+              Register an organization, upload records, and review signals, opportunities, and a simulated support workflow. The bundled demo company is synthetic. Service engagements remain available for work this application does not connect.
             </p>
+            <div className="mt-6">
+              <ButtonLink href="/register" variant="inverse" arrow>
+                Create an account
+              </ButtonLink>
+            </div>
           </article>
         </div>
         <div className="mt-8">

@@ -35,7 +35,7 @@ export default function AboutPage() {
           ))}
         </div>
         <p className="mt-10 max-w-3xl text-base leading-7 text-ink">
-          Opportunity Intelligence is the longer vision: connect a business signal to a recommended change and the workflow that carries it. Feedback Intelligence is the early demonstration of the reading step. Until those are products a team can buy, the credible path is a scoped service engagement.
+          Opportunity Intelligence is the application that connects a business signal to a recommended change and an approved workflow. Feedback Intelligence is still the synthetic reading demo. A scoped service engagement remains the path for work the application does not cover, and neither surface publishes customer results.
         </p>
       </Section>
       <CtaBand />
