@@ -43,6 +43,8 @@ export function SiteFooter() {
             <li><Link className="text-on-inverse/80 hover:text-on-inverse" href="/products">Products</Link></li>
             <li><Link className="text-on-inverse/80 hover:text-on-inverse" href="/about">About</Link></li>
             <li><Link className="text-on-inverse/80 hover:text-on-inverse" href="/contact">Contact</Link></li>
+            <li><Link className="text-on-inverse/80 hover:text-on-inverse" href="/how-it-works">How it works</Link></li>
+            <li><Link className="text-on-inverse/80 hover:text-on-inverse" href="/login">Sign in</Link></li>
             <li><Link className="text-on-inverse/80 hover:text-on-inverse" href="/products/feedback-intelligence">Feedback Intelligence</Link></li>
           </ul>
         </div>

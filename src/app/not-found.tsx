@@ -1,7 +1,12 @@
 import { ButtonLink } from "@/components/button-link";
+import { SiteFooter } from "@/components/site-footer";
+import { SiteHeader } from "@/components/site-header";
 
 export default function NotFound() {
   return (
+    <>
+    <SiteHeader />
+    <main id="content" className="flex-1">
     <section className="mx-auto flex w-full max-w-6xl flex-col px-5 py-24 md:px-8">
       <p className="text-xs font-semibold tracking-[0.16em] text-cyan uppercase">
         404
@@ -18,5 +23,8 @@ export default function NotFound() {
         </ButtonLink>
       </div>
     </section>
+    </main>
+    <SiteFooter />
+    </>
   );
 }

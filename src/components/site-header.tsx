@@ -102,6 +102,9 @@ export function SiteHeader() {
 
         <div className="flex items-center gap-2">
           <ThemeToggle />
+          <Link href="/login" className="hidden min-h-10 items-center rounded-lg px-3 text-sm font-semibold text-navy lg:inline-flex">
+            Sign in
+          </Link>
           <Link
             href="/contact"
             className="hidden min-h-10 items-center rounded-lg bg-btn px-4 text-sm font-semibold text-on-btn hover:bg-btn-hover lg:inline-flex"
@@ -136,6 +139,9 @@ export function SiteHeader() {
               {item.label}
             </Link>
           ))}
+          <Link href="/login" className="mt-3 block py-2 text-base font-semibold text-navy">
+            Sign in
+          </Link>
           <Link href="/contact" className="mt-3 inline-flex min-h-11 items-center rounded-lg bg-btn px-4 text-sm font-semibold text-on-btn">
             Discuss Your Project
           </Link>

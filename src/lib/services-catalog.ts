@@ -214,7 +214,7 @@ export const serviceCategories: ServiceCategory[] = [
       problem:
         "Signals sit in tickets, reviews, search, and handoffs, and the team cannot yet name the opportunity worth acting on.",
       solution:
-        "Opportunity Intelligence is a strategic direction, delivered today as a scoped analysis. We connect the signals you already have to a recommended change. It is not a finished product you can log into.",
+        "Opportunity Intelligence is available as an application in this site: upload records, review the evidence, and approve a simulated support workflow. A scoped analysis is still how a team starts when the data or the channel is outside that application.",
       capabilities: [
         "An inventory of the signals that matter for the question",
         "Themes and opportunities, with the constraint that makes each one real",

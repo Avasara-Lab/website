@@ -32,7 +32,7 @@ export function HeroFlow() {
             Opportunity Intelligence
           </p>
           <p className="mt-1 text-xs leading-5 text-muted">
-            Strategic direction. A framed engagement, with synthetic notes. Not a product you can log into.
+            The diagram is illustrative. The application is at Sign in, and its demo company is synthetic.
           </p>
         </div>
         <p className="shrink-0 rounded-md bg-paper px-2 py-1 text-[11px] font-semibold tracking-[0.12em] text-muted uppercase">

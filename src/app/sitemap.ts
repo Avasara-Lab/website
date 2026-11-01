@@ -10,6 +10,10 @@ const paths = [
   "/products/feedback-intelligence",
   "/about",
   "/contact",
+  "/how-it-works",
+  "/features",
+  "/login",
+  "/register",
 ];
 
 export default function sitemap(): MetadataRoute.Sitemap {
