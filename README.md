@@ -144,6 +144,46 @@ The endpoint also applies a process-local limit of 8 requests per 15 minutes per
 
 The honeypot field `company_website` must stay empty. A filled honeypot is discarded and no email is sent. The API does not store enquiries in a database.
 
+## Opportunity Intelligence application
+
+The marketing pages stay on `/`, `/services`, `/products`, `/about`, and `/contact`. The authenticated product lives under `/app`. Register at `/register`. Architecture choices, including why the first release uses Next.js Route Handlers instead of a separate Fastify process, are in `ARCHITECTURE.md`.
+
+### Local setup
+
+PostgreSQL is required. Redis is required only when ingestion is queued. Copy the environment file and set the database URL plus a random auth secret of at least 32 characters:
+
+```bash
+cp .env.example .env.local
+npm install
+npm run db:migrate
+npm run db:seed
+npm run dev
+```
+
+Open [http://localhost:3000](http://localhost:3000). Sign in to the seeded synthetic company with `founder@avasara-demo.test` and `DemoFounder!2026`. That company is labeled synthetic. Its counts are not customer results.
+
+`npm run db:seed` creates the user through Better Auth and ingests the synthetic records through the same pipeline as an upload. Running it again does not duplicate events.
+
+Set `MODEL_API_KEY` to call Meta Model API at `https://api.meta.ai/v1`. Without it, AI configuration reports that live calls are blocked. The app does not call another model vendor. Optional R2 variables switch uploads from `.data/uploads` to Cloudflare R2. Set `INGESTION_MODE=queue` and `REDIS_URL`, then run `npm run worker`, to process uploads with BullMQ. The default processes an upload in the request and still writes an ingestion job.
+
+### Checks
+
+```bash
+npm test
+npm run lint
+npm run build
+```
+
+`npm test` includes the contact-form tests and a PostgreSQL critical-path test. That test expects `postgres://avasara:avasara@127.0.0.1:5432/avasara_test`. Create that database before running the suite, or point the test at another database by editing the connection string in `src/server/critical-path.test.ts`.
+
+### Product behavior that is intentionally incomplete
+
+- HubSpot, Gmail, Slack, Notion, ClickUp, and QuickBooks are listed as needing configuration. Credentials are not stored and no sync is pretended.
+- The support agent writes to a simulated inbox. The log says simulated.
+- Sales follow-up and reporting recommendations have no executor.
+- Muse Spark Open and Muse Glimmer are open-weight and are not called on the hosted API. SAM 3.1 is documented and not requested, because this release does not assemble a media-segmentation body.
+- Invitation email is not sent. The owner is shown a one-time accept path.
+
 ## Product status
 
-Feedback Intelligence is an early direction with a synthetic demo. Opportunity Intelligence is a longer-term vision. Neither is live, production-ready, or for sale.
+Feedback Intelligence is a synthetic demo. Opportunity Intelligence is the authenticated application in this repository. The seeded company and its metrics are synthetic. The contact form still delivers only after Resend returns a message id.
