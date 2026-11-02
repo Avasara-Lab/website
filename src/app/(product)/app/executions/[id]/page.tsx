@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Empty, PageIntro, StatusBadge } from "@/components/app/ui";
+import { BackLink, Empty, PageIntro, StatusBadge } from "@/components/app/ui";
 import { formatWhen, labelize } from "@/lib/app-labels";
 import { requireOrg } from "@/server/auth/context";
 import { runDetail } from "@/server/modules/read/service";
@@ -13,6 +13,7 @@ export default async function ExecutionPage({ params }: { params: Promise<{ id: 
   const verified = detail.run.verificationStatus === "verified";
   return (
     <>
+      <BackLink href="/app/executions">Back to executions</BackLink>
       <PageIntro
         eyebrow="Execution log"
         title={verified ? "Verified run" : "Run needs review"}

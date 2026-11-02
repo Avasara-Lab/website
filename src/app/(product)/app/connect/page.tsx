@@ -15,10 +15,19 @@ export default async function ConnectPage() {
         title="Bring records into this organization"
         text="Uploads are parsed into observed events. Third-party connectors stay unconfigured until a real integration exists."
       />
-      {canWrite(context.role) ? <UploadForm /> : <p className="text-sm leading-6 text-muted">Your role can view sources. Uploads require a manager, administrator, or owner.</p>}
+      {canWrite(context.role) ? (
+        <UploadForm />
+      ) : (
+        <Notice title="Uploads need a higher role">
+          Your role can view sources. Uploading a file stays with owners, administrators, and managers.
+        </Notice>
+      )}
       <section className="grid gap-3">
-        <h2 className="text-lg font-semibold text-navy">Sources</h2>
-        {!data.sources.length ? <Empty title="No data sources" text="Creating an organization adds file upload and the unconfigured connectors." /> : null}
+        <div>
+          <h2 className="text-lg font-semibold text-navy">Available sources</h2>
+          <p className="mt-1 text-sm leading-6 text-muted">File upload is ready to use. Named business systems stay unconfigured until a real integration exists.</p>
+        </div>
+        {!data.sources.length ? <Empty title="No sources yet" text="File upload is added with the organization. Refresh if you just finished creating the workspace." /> : null}
         {data.sources.map((source) => (
           <article key={source.id} className="panel flex flex-wrap items-center justify-between gap-3 rounded-xl p-4">
             <div>

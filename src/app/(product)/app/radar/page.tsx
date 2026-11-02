@@ -35,7 +35,7 @@ export default async function RadarPage({ searchParams }: { searchParams: Promis
         <Stat label="Active agents" value={summary.activeAgents} provenance="observed" />
         <Stat label="Completed" value={summary.completedAutomations} provenance="observed" />
       </section>
-      <form className="panel grid gap-3 rounded-xl p-4 sm:grid-cols-2 lg:grid-cols-4 lg:items-end" action="/app/radar">
+      <form className="panel grid gap-3 rounded-xl p-4 sm:grid-cols-2 lg:grid-cols-4 lg:items-end" action="/app/radar" aria-label="Filter opportunities">
         <FilterSelect label="Status" name="status" value={filters.status ?? ""}>
           <option value="">Any status</option>
           {STATUSES.map((status) => (

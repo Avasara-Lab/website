@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { AgentStatusButton } from "@/components/app/client";
-import { Badge, PageIntro, Section, StatusBadge } from "@/components/app/ui";
+import { BackLink, Badge, PageIntro, Section, StatusBadge } from "@/components/app/ui";
 import { labelize } from "@/lib/app-labels";
 import { requireOrg } from "@/server/auth/context";
 import { canWrite } from "@/server/domain";
@@ -17,6 +17,7 @@ export default async function AgentPage({ params }: { params: Promise<{ id: stri
   const tools = data.tools.filter((tool) => tool.agentId === agent.id);
   return (
     <>
+      <BackLink href="/app/agents">Back to AI agents</BackLink>
       <PageIntro eyebrow="Agent" title={agent.name} text={agent.description} />
       <div className="grid items-start gap-4 lg:grid-cols-[minmax(0,1fr)_280px]">
         <div className="grid gap-4">

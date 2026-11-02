@@ -1,5 +1,5 @@
 import { ProfileForm } from "@/components/app/client";
-import { DataTable, PageIntro, Section, tdClass, thClass } from "@/components/app/ui";
+import { Badge, DataTable, Empty, PageIntro, Section, tdClass, thClass } from "@/components/app/ui";
 import { formatWhen, labelize } from "@/lib/app-labels";
 import { requireOrg } from "@/server/auth/context";
 import { canAdminister } from "@/server/domain";
@@ -12,10 +12,24 @@ export default async function SettingsPage() {
     <>
       <PageIntro
         eyebrow="Organization settings"
-        title="Company profile"
-        text="The profile is the organization record. Saving it does not change another tenant."
+        title={data.profile?.companyName || context.organizationName}
+        text="This name is the active organization in the header and sidebar. Saving the profile changes only this organization."
       />
-      <p className="text-sm leading-6 text-muted">Departments: {data.departments.map((department) => department.name).join(", ") || "none"}.</p>
+      <section className="panel rounded-xl p-5">
+        <h2 className="text-sm font-semibold text-navy">Departments</h2>
+        <p className="mt-1 text-sm leading-6 text-muted">Set when the organization was created. Opportunities use these names when they are grouped.</p>
+        {data.departments.length ? (
+          <ul className="mt-3 flex flex-wrap gap-2">
+            {data.departments.map((department) => (
+              <li key={department.id}>
+                <Badge>{department.name}</Badge>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="mt-3 text-sm text-muted">None recorded.</p>
+        )}
+      </section>
       {canAdminister(context.role) && data.profile ? (
         <ProfileForm
           companyName={data.profile.companyName}
@@ -47,7 +61,7 @@ export default async function SettingsPage() {
             </tbody>
           </DataTable>
         ) : (
-          <p className="text-sm leading-6 text-muted">No audited actions yet.</p>
+          <Empty title="No audited actions yet" text="Uploads, invitations, and approvals appear here after someone takes those actions in this organization." />
         )}
       </Section>
     </>

@@ -14,7 +14,7 @@ export default async function AiPage() {
       <PageIntro
         eyebrow="Meta Model API"
         title="Model configuration"
-        text="Calls go to https://api.meta.ai/v1 with the server-side MODEL_API_KEY. An empty key blocks the call. The browser never receives the key, and no other provider is called."
+        text="Most teams leave these defaults. Calls go to https://api.meta.ai/v1 with the server-side MODEL_API_KEY. An empty key blocks the call. The browser never receives the key, and no other provider is called."
       />
       {canAdminister(context.role) && config ? (
         <AiConfigForm

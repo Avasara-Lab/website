@@ -5,13 +5,13 @@ export const controlClass =
   "min-h-11 w-full rounded-lg border border-line bg-surface px-3 text-sm font-normal text-navy";
 
 export const primaryButtonClass =
-  "inline-flex min-h-11 items-center justify-center rounded-lg bg-btn px-4 text-sm font-semibold text-on-btn disabled:cursor-not-allowed disabled:opacity-60";
+  "inline-flex min-h-11 items-center justify-center gap-2 rounded-lg bg-btn px-4 text-sm font-semibold text-on-btn hover:bg-btn-hover disabled:cursor-not-allowed disabled:opacity-60";
 
 export const secondaryButtonClass =
-  "inline-flex min-h-10 items-center justify-center rounded-lg border border-line bg-surface px-3 text-sm font-semibold text-navy hover:bg-mist disabled:cursor-not-allowed disabled:opacity-60";
+  "inline-flex min-h-11 items-center justify-center gap-2 rounded-lg border border-line bg-surface px-3 text-sm font-semibold text-navy hover:border-cyan/40 hover:bg-mist disabled:cursor-not-allowed disabled:opacity-60";
 
 export const dangerButtonClass =
-  "inline-flex min-h-10 items-center justify-center rounded-lg border border-danger/40 bg-danger-soft px-3 text-sm font-semibold text-danger disabled:cursor-not-allowed disabled:opacity-60";
+  "inline-flex min-h-11 items-center justify-center gap-2 rounded-lg border border-danger/40 bg-danger-soft px-3 text-sm font-semibold text-danger hover:border-danger disabled:cursor-not-allowed disabled:opacity-60";
 
 export const thClass = "bg-paper px-4 py-3 text-left text-[11px] font-semibold tracking-[0.14em] text-muted uppercase";
 export const tdClass = "border-t border-line px-4 py-3 align-top text-navy";
@@ -44,6 +44,14 @@ export function StatusBadge({ value }: { value: string }) {
     <Badge tone={toneFor(value)} title={provenanceHint(value)}>
       {labelize(value)}
     </Badge>
+  );
+}
+
+export function BackLink({ href, children }: { href: string; children: React.ReactNode }) {
+  return (
+    <Link href={href} className="inline-flex min-h-10 w-fit items-center text-sm font-semibold text-cyan">
+      {children}
+    </Link>
   );
 }
 

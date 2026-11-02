@@ -1,4 +1,5 @@
-import { DataTable, Empty, PageIntro, StatusBadge, tdClass, thClass } from "@/components/app/ui";
+import Link from "next/link";
+import { DataTable, Empty, PageIntro, StatusBadge, secondaryButtonClass, tdClass, thClass } from "@/components/app/ui";
 import { formatWhen } from "@/lib/app-labels";
 import { requireOrg } from "@/server/auth/context";
 import { connectSnapshot } from "@/server/modules/read/service";
@@ -12,6 +13,11 @@ export default async function SourcesPage() {
         eyebrow="Data sources"
         title="Ingestion history"
         text="Each upload keeps its name, status, record count, and the job that processed it. Files appear here after you upload them from Business Connect."
+        actions={
+          <Link href="/app/connect" className={secondaryButtonClass}>
+            Upload a file
+          </Link>
+        }
       />
       {!data.files.length ? (
         <Empty
@@ -39,7 +45,7 @@ export default async function SourcesPage() {
                   <td className={tdClass}>
                     <p className="font-semibold">{file.originalName}</p>
                     <p className="mt-1 text-xs text-muted">
-                      {formatWhen(file.createdAt, true)} · {file.byteSize.toLocaleString("en-US")} bytes
+                      {formatWhen(file.createdAt, true)} · {formatBytes(file.byteSize)}
                     </p>
                   </td>
                   <td className={tdClass}>
@@ -56,7 +62,7 @@ export default async function SourcesPage() {
                       <span className="text-muted">No job recorded</span>
                     )}
                   </td>
-                  <td className={`${tdClass} max-w-xs text-danger`}>{error || <span className="text-muted">None</span>}</td>
+                  <td className={`${tdClass} max-w-xs text-danger`}>{error || <span className="text-muted">No error</span>}</td>
                 </tr>
               );
             })}
@@ -65,4 +71,10 @@ export default async function SourcesPage() {
       )}
     </>
   );
+}
+
+function formatBytes(bytes: number) {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(bytes < 10 * 1024 ? 1 : 0)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }

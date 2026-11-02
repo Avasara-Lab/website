@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { InterpretButton, OpportunityActions } from "@/components/app/client";
-import { Badge, Empty, KeyFacts, PageIntro, Section, StatusBadge } from "@/components/app/ui";
+import { BackLink, Badge, Empty, KeyFacts, PageIntro, Section, StatusBadge } from "@/components/app/ui";
 import { formatConfidence, formatWhen, labelize } from "@/lib/app-labels";
 import { requireOrg } from "@/server/auth/context";
 import { canAdminister, canWrite } from "@/server/domain";
@@ -20,6 +20,7 @@ export default async function OpportunityPage({ params }: { params: Promise<{ id
   const ungrouped = evidence.filter((item) => !signals.some((signal) => signal.id === item.signalId));
   return (
     <>
+      <BackLink href="/app/radar">Back to Opportunity Radar</BackLink>
       <PageIntro eyebrow="Opportunity" title={opportunity.title} text={opportunity.problem} />
       <div className="grid items-start gap-4 lg:grid-cols-[minmax(0,1fr)_300px]">
         <div className="grid gap-4">
