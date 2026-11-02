@@ -24,7 +24,7 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
       ) : null}
       {query.length >= 2 && total ? (
         <>
-          <Section title="Signals" text={results.signals.length ? `${results.signals.length} shown. Signals do not have a separate detail page.` : "No signal titles matched."}>
+          <Section title="Signals" text={results.signals.length ? `${results.signals.length} shown. Signals do not have a separate detail page.` : undefined}>
             <ul className="grid gap-2">
               {results.signals.map((item) => (
                 <li key={item.id} className="panel rounded-xl px-4 py-3 text-sm">
@@ -35,10 +35,18 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
                   </p>
                 </li>
               ))}
-              {!results.signals.length ? <li className="text-sm text-muted">None.</li> : null}
+              {!results.signals.length ? (
+                <li className="text-sm leading-6 text-muted">
+                  No signal titles matched.{" "}
+                  <Link href="/app/signals" className="font-semibold text-cyan">
+                    Browse signals
+                  </Link>
+                  .
+                </li>
+              ) : null}
             </ul>
           </Section>
-          <Section title="Opportunities" text={results.opportunities.length ? "Open a result to review evidence." : "No opportunity titles matched."}>
+          <Section title="Opportunities" text={results.opportunities.length ? "Open a result to review evidence." : undefined}>
             <ul className="grid gap-2">
               {results.opportunities.map((item) => (
                 <li key={item.id}>
@@ -51,10 +59,10 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
                   </Link>
                 </li>
               ))}
-              {!results.opportunities.length ? <li className="text-sm text-muted">None.</li> : null}
+              {!results.opportunities.length ? <li className="text-sm leading-6 text-muted">No opportunity titles matched.</li> : null}
             </ul>
           </Section>
-          <Section title="Events" text={results.events.length ? "Events are listed here. Open Business Memory for the wider record." : "No event text matched."}>
+          <Section title="Events" text={results.events.length ? "Events are listed here. Open Business Memory for the wider record." : undefined}>
             <ul className="grid gap-2">
               {results.events.map((item) => (
                 <li key={item.id} className="panel rounded-xl px-4 py-3 text-sm">
@@ -65,7 +73,7 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
                   <p className="mt-2 font-semibold text-navy">{item.title}</p>
                 </li>
               ))}
-              {!results.events.length ? <li className="text-sm text-muted">None.</li> : null}
+              {!results.events.length ? <li className="text-sm leading-6 text-muted">No event text matched.</li> : null}
             </ul>
           </Section>
         </>

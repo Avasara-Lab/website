@@ -1,6 +1,7 @@
 "use client";
 
 import { createAuthClient } from "better-auth/react";
+import { LogOut } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { META_MODELS } from "@/server/modules/meta-ai/catalog";
@@ -70,9 +71,16 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
   }
 
   return (
-    <form onSubmit={onSubmit} className="panel grid max-w-md gap-4 rounded-xl p-6">
+    <form onSubmit={onSubmit} className="panel grid w-full gap-4 rounded-xl p-6">
       {mode === "register" ? <Field label="Name" name="name" autoComplete="name" hint="Shown to people in your organization." required /> : null}
-      <Field label="Email" name="email" type="email" autoComplete="email" hint="Use the address you registered for this workspace." required />
+      <Field
+        label="Email"
+        name="email"
+        type="email"
+        autoComplete="email"
+        hint={mode === "login" ? "The address you registered with." : "You will sign in with this address."}
+        required
+      />
       <Field
         label="Password"
         name="password"
@@ -121,7 +129,7 @@ export function OnboardingForm() {
 
   return (
     <form onSubmit={onSubmit} className="panel grid max-w-xl gap-4 rounded-xl p-6">
-      <Field label="Company name" name="name" hint="This becomes the workspace name. Data stays inside it." required />
+      <Field label="Company name" name="name" hint="Shown as the active organization in the workspace. Data stays inside it." required />
       <Field label="Industry" name="industry" hint="Optional. Used as context on the company profile." />
       <Field label="Employee count" name="employeeCount" type="number" min={1} hint="Optional." />
       <label className="grid gap-1.5 text-sm font-medium text-navy">
@@ -157,8 +165,8 @@ export function UploadForm() {
       setError(data.error || "Upload failed.");
       return;
     }
-    if (data.status === "failed") setError(data.error || "Processing failed.");
-    else setNote(data.status ? `Processing status: ${data.status}.` : "Upload received.");
+    if (data.status === "failed") setError(data.error || "Processing failed. Check the file type and try again.");
+    else setNote(uploadMessage(data.status));
     router.refresh();
   }
 
@@ -166,9 +174,16 @@ export function UploadForm() {
     <form onSubmit={onSubmit} className="panel grid gap-3 rounded-xl p-5">
       <label className="grid gap-1.5 text-sm font-medium text-navy" htmlFor="business-file">
         Business file
-        <input id="business-file" name="file" type="file" required accept=".csv,.xlsx,.json,.txt,.md,.pdf,.wav" className="text-sm font-normal" />
+        <input
+          id="business-file"
+          name="file"
+          type="file"
+          required
+          accept=".csv,.xlsx,.json,.txt,.md,.pdf,.wav"
+          className="block w-full text-sm font-normal file:mr-3 file:inline-flex file:min-h-9 file:items-center file:rounded-lg file:border-0 file:bg-mist file:px-3 file:text-sm file:font-semibold file:text-navy"
+        />
       </label>
-      <p className="text-xs leading-5 text-muted">CSV, XLSX, JSON, TXT, Markdown, PDF, or WAV. Maximum 10 MB. A duplicate file for this organization is rejected.</p>
+      <p className="text-xs leading-5 text-muted">CSV, Excel, JSON, text, Markdown, PDF, or WAV. Maximum 10 MB. A file already uploaded for this organization is rejected.</p>
       <Message text={error} />
       <Success text={note} />
       <button className={primaryButtonClass} disabled={pending} type="submit">
@@ -261,7 +276,9 @@ export function InviteForm({ emailConfigured }: { emailConfigured: boolean }) {
   const [error, setError] = useState<string | null>(null);
   const [note, setNote] = useState<string | null>(null);
   const [path, setPath] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
   const [pending, setPending] = useState(false);
+  const inviteLink = path ? absoluteInviteLink(path) : null;
   return (
     <form
       className="panel grid gap-3 rounded-xl p-5"
@@ -274,6 +291,7 @@ export function InviteForm({ emailConfigured }: { emailConfigured: boolean }) {
         const form = new FormData(event.currentTarget);
         try {
           const data = await postJson("/api/app/invitations", { email: String(form.get("email")), role: String(form.get("role")) });
+          setCopied(false);
           setPath(data.acceptPath ?? null);
           setNote(data.note ?? null);
           router.refresh();
@@ -293,12 +311,12 @@ export function InviteForm({ emailConfigured }: { emailConfigured: boolean }) {
           <option value="manager">Manager</option>
           <option value="member">Member</option>
         </select>
-        <span className="text-xs leading-5 font-normal text-muted">Managers can approve and execute. Members can read. Owners are not invited from this form.</span>
+        <span className="text-xs leading-5 font-normal text-muted">Managers can upload, approve, and execute. Members can review. Owners are not invited from this form.</span>
       </label>
       <p className="text-xs leading-5 text-muted">
         {emailConfigured
-          ? "Resend sends the invitation from CONTACT_FROM_EMAIL when that sender and RESEND_API_KEY are set. The one-time path is still shown here."
-          : "RESEND_API_KEY or CONTACT_FROM_EMAIL is not set, so email is not sent. The one-time path is shown after you create the invitation."}
+          ? "When mail is configured, an invitation email is sent. The one-time link is still shown here so you can share it directly."
+          : "Invitation email is not configured on this server, so nothing is emailed. After you create the invitation, copy the one-time link and send it yourself."}
       </p>
       <Message text={error} />
       {note ? (
@@ -306,10 +324,27 @@ export function InviteForm({ emailConfigured }: { emailConfigured: boolean }) {
           {note}
         </p>
       ) : null}
-      {path ? (
-        <p className="break-all rounded-lg bg-paper px-3 py-2 text-sm leading-6 text-navy">
-          One-time path: <span className="font-medium">{path}</span>
-        </p>
+      {inviteLink ? (
+        <div className="grid gap-2 rounded-lg bg-paper px-3 py-3">
+          <p className="text-sm font-semibold text-navy">One-time invitation link</p>
+          <p className="text-xs leading-5 text-muted">Send this to the invited person. It works once, only for that email, and only for this organization.</p>
+          <p className="break-all text-sm leading-6 font-medium text-navy">{inviteLink}</p>
+          <button
+            className={`${secondaryButtonClass} w-fit`}
+            type="button"
+            onClick={async () => {
+              try {
+                await navigator.clipboard.writeText(inviteLink);
+                setCopied(true);
+              } catch {
+                setCopied(false);
+                setError("Could not copy the link. Select it and copy it manually.");
+              }
+            }}
+          >
+            {copied ? "Link copied" : "Copy invitation link"}
+          </button>
+        </div>
       ) : null}
       <button className={primaryButtonClass} disabled={pending} type="submit">{pending ? "Creating…" : "Create invitation"}</button>
     </form>
@@ -349,12 +384,13 @@ export function ProfileForm({ companyName, industry, employeeCount, objectives }
         }
       }}
     >
-      <Field label="Company name" name="companyName" defaultValue={companyName} hint="Also updates the workspace name in the sidebar." required />
+      <Field label="Company name" name="companyName" defaultValue={companyName} hint="This is the active organization name in the header and sidebar." required />
       <Field label="Industry" name="industry" defaultValue={industry} />
       <Field label="Employee count" name="employeeCount" type="number" defaultValue={employeeCount ? String(employeeCount) : ""} />
       <label className="grid gap-1.5 text-sm font-medium text-navy" htmlFor="objectives">
         Objectives
         <textarea id="objectives" name="objectives" defaultValue={objectives} className="min-h-24 rounded-lg border border-line bg-surface px-3 py-2 text-sm font-normal" />
+        <span className="text-xs leading-5 font-normal text-muted">What this workspace should pay attention to. It stays on this organization.</span>
       </label>
       <Message text={error} />
       {saved ? <Success text="Profile saved for this organization." /> : null}
@@ -470,16 +506,57 @@ export function MarkNotifications({ ids }: { ids: string[] }) {
   );
 }
 
+export function SignOutButton({ className }: { className?: string }) {
+  const [error, setError] = useState<string | null>(null);
+  const [pending, setPending] = useState(false);
+
+  async function signOut() {
+    setPending(true);
+    setError(null);
+    try {
+      const result = await authClient.signOut();
+      if (result.error) {
+        setError(result.error.message || "Could not sign out. Try again.");
+        setPending(false);
+        return;
+      }
+      // A full load applies the cleared session cookie. A client transition
+      // stays on this page when the workspace layout redirects mid-navigation.
+      const destination = new URL("/login", window.location.origin);
+      window.location.assign(destination.toString());
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : "Could not sign out. Try again.");
+      setPending(false);
+    }
+  }
+
+  return (
+    <div className="grid gap-2">
+      <button
+        className={className ?? `${secondaryButtonClass} min-h-11 gap-2`}
+        type="button"
+        disabled={pending}
+        aria-busy={pending}
+        onClick={() => void signOut()}
+      >
+        <LogOut className="size-4 shrink-0" aria-hidden />
+        {pending ? "Signing out…" : "Sign out"}
+      </button>
+      <Message text={error} />
+    </div>
+  );
+}
+
 export function OrgSwitcher({ memberships, current }: { memberships: { organizationId: string; name: string }[]; current: string }) {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   if (memberships.length < 2) return null;
   return (
-    <label className="grid gap-1.5 text-xs font-medium text-muted" htmlFor="active-organization">
-      Organization
+    <label className="grid gap-1.5 text-[11px] font-semibold tracking-[0.12em] text-navy uppercase" htmlFor="active-organization">
+      Switch organization
       <select
         id="active-organization"
-        className={controlClass}
+        className={`${controlClass} border-cyan/40 bg-surface font-semibold text-navy normal-case`}
         value={current}
         onChange={async (event) => {
           setError(null);
@@ -585,6 +662,19 @@ export function AnalyzeButton() {
       <Message text={error} />
     </form>
   );
+}
+
+function uploadMessage(status: string | undefined) {
+  if (status === "completed") return "File processed. Open Data sources to confirm the record count, then re-analyze from Overview or Signals.";
+  if (status === "pending" || status === "running") return "Upload received. Processing is still running. Check Data sources in a moment.";
+  if (status) return `Upload received. Current status: ${status.replace(/[_-]+/g, " ")}.`;
+  return "Upload received.";
+}
+
+function absoluteInviteLink(path: string) {
+  if (path.startsWith("http://") || path.startsWith("https://")) return path;
+  if (typeof window === "undefined") return path;
+  return `${window.location.origin}${path.startsWith("/") ? path : `/${path}`}`;
 }
 
 function Action({

@@ -1,9 +1,8 @@
 export const INVITE_EMAIL_NOTES = {
-  sent: "Resend accepted the invitation email. The one-time accept path is also shown in this response.",
+  sent: "The invitation email was accepted for delivery. The one-time link is also shown here if you need to share it directly.",
   not_configured:
-    "RESEND_API_KEY or CONTACT_FROM_EMAIL is not set. Email was not sent. Share this one-time path with the invited person. It is shown only in this response.",
-  failed:
-    "Resend did not accept the invitation email. Share this one-time path. It is shown only in this response.",
+    "Email was not sent. Invitation mail is not configured on this server. Share the one-time link below. It is shown only in this response.",
+  failed: "The mail provider did not accept the invitation email. Share the one-time link below. It is shown only in this response.",
 } as const;
 
 export type InviteEmailDelivery = keyof typeof INVITE_EMAIL_NOTES;

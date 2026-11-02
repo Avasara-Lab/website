@@ -12,7 +12,7 @@ export default async function MemoryPage() {
       <PageIntro
         eyebrow="Business Memory"
         title="Observed records and the links between them"
-        text="Observed events come from uploads or the synthetic seed. Model transcripts are stored as interpretations and are excluded from signal counts."
+        text="Observed events come from files uploaded to this organization. If this workspace is the synthetic demo, the banner at the top says so and those rows are not customer results. Model transcripts are stored as interpretations and are excluded from signal counts."
       />
       <section className="grid gap-3 sm:grid-cols-3" aria-label="Memory counts">
         <Stat label="Observed" value={Number(data.counts?.observed ?? 0)} provenance="observed" detail="Events eligible for signal detection." />
@@ -30,7 +30,7 @@ export default async function MemoryPage() {
             ))}
           </ul>
         ) : (
-          <Empty title="No observed events" text="Upload a file or load the synthetic seed. Counts stay at zero until observed rows exist." />
+          <Empty title="No observed events" text="Upload a file from Business Connect. Counts stay at zero until observed events exist." action={{ href: "/app/connect", label: "Upload records" }} />
         )}
       </Section>
       <Section title="Entities" text={shown.length < data.entities.length ? `Showing ${shown.length} of ${data.entities.length}.` : undefined}>

@@ -16,7 +16,7 @@ export default async function ImpactPage() {
       {!snapshot.metrics.length ? (
         <Empty
           title="No impact yet"
-          text="Ingest events to see observed counts. Verified and simulated rows appear after an agent run."
+          text="Upload records to see observed counts. Verified and simulated rows appear after an agent run."
           action={{ href: "/app/connect", label: "Upload records" }}
         />
       ) : (

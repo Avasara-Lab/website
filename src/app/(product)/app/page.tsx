@@ -16,7 +16,7 @@ export default async function OverviewPage() {
       <PageIntro
         eyebrow="Overview"
         title={context.organizationName}
-        text="Counts come from this organization’s database. Estimates stay labeled. Upload records and re-analyze when a figure is still zero."
+        text="You are working in this organization. Counts come from its database. Estimates stay labeled. Upload records and re-analyze when a figure is still zero."
         actions={<AnalyzeButton />}
       />
       <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4" aria-label="Workspace counts">
