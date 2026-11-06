@@ -13,17 +13,26 @@ export function ButtonLink({
   children,
   variant = "primary",
   arrow = false,
+  external = false,
 }: {
   href: string;
   children: React.ReactNode;
   variant?: keyof typeof variants;
   arrow?: boolean;
+  external?: boolean;
 }) {
+  const className = `inline-flex min-h-11 items-center justify-center gap-2 rounded-lg px-5 text-sm font-semibold transition-colors ${variants[variant]}`;
+  if (external) {
+    return (
+      <a href={href} className={className} target="_blank" rel="noopener noreferrer">
+        {children}
+        {arrow ? <ArrowRight className="size-4" aria-hidden="true" /> : null}
+        <span className="sr-only"> (opens in a new tab)</span>
+      </a>
+    );
+  }
   return (
-    <Link
-      href={href}
-      className={`inline-flex min-h-11 items-center justify-center gap-2 rounded-lg px-5 text-sm font-semibold transition-colors ${variants[variant]}`}
-    >
+    <Link href={href} className={className}>
       {children}
       {arrow ? <ArrowRight className="size-4" aria-hidden="true" /> : null}
     </Link>
