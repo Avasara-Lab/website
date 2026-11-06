@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
+import { marketingSiteIsVisible } from "@/lib/marketing-mode";
+import { opportunity } from "@/lib/opportunity";
 import { site } from "@/lib/site";
 import "./globals.css";
 
@@ -12,35 +14,41 @@ const inter = Inter({
 
 const themeBoot = `(function(){try{var stored=localStorage.getItem("avasara-theme");var theme=stored==="light"||stored==="dark"||stored==="system"?stored:"system";var dark=theme==="dark"||(theme!=="light"&&window.matchMedia("(prefers-color-scheme: dark)").matches);document.documentElement.dataset.theme=dark?"dark":"light";document.documentElement.dataset.themeChoice=theme;}catch(e){document.documentElement.dataset.theme="light";document.documentElement.dataset.themeChoice="system";}document.documentElement.classList.add("js","theme-ready");})();`;
 
-export const metadata: Metadata = {
-  metadataBase: new URL(site.url),
-  title: {
-    default: "Avasara Lab",
-    template: "%s · Avasara Lab",
-  },
-  description: site.description,
-  applicationName: site.name,
-  openGraph: {
-    type: "website",
-    siteName: site.name,
-    title: site.name,
-    description: site.description,
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: site.name,
-    description: site.description,
-  },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const product = !(await marketingSiteIsVisible());
+  const description = product ? opportunity.description : site.description;
+  const title = product ? opportunity.title : site.name;
+  return {
+    metadataBase: new URL(site.url),
+    title: {
+      default: product ? opportunity.name : site.name,
+      template: `%s · ${site.name}`,
+    },
+    description,
+    applicationName: product ? opportunity.name : site.name,
+    openGraph: {
+      type: "website",
+      siteName: site.name,
+      title,
+      description,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+    },
+  };
+}
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const product = !(await marketingSiteIsVisible());
   const organization = {
     "@context": "https://schema.org",
     "@type": "Organization",
     name: site.name,
-    description: site.description,
+    description: product ? opportunity.description : site.description,
     url: site.url,
-    slogan: site.tagline,
+    slogan: product ? opportunity.title : site.tagline,
   };
 
   return (

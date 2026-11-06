@@ -35,6 +35,7 @@ export function pageMetadata({
       url: path,
     },
     twitter: {
+      card: "summary_large_image",
       title: `${title} · ${site.name}`,
       description,
     },

@@ -1,6 +1,6 @@
 # Avasara Lab
 
-**Opportunity Intelligence** is the product in this repository: the Opportunity Intelligence Layer, multi-tenant AI business intelligence and agentic execution for founders and small teams. The live site is [https://avasaralab.com](https://avasaralab.com). Marketing pages and the authenticated application at `/app` ship together.
+**Opportunity Intelligence** is the product in this repository: the Opportunity Intelligence Layer, multi-tenant AI business intelligence and agentic execution for founders and small teams. The live site is [https://avasaralab.com](https://avasaralab.com). Marketing pages and the authenticated application at `/app` ship together. Until 16 November 2026 at 00:00 UTC, the public homepage presents Opportunity Intelligence. The studio homepage stays in the repository and returns after that instant. Restore steps are in `src/lib/marketing-window.ts`.
 
 Avasara Lab is an AI engineering studio for US and global B2B teams. The public line is “Find the opportunity. Build the intelligence. Automate the outcome.” The tagline is “Turn business signals into automation opportunities.” This repository does not publish clients, certifications, revenue, or customer metrics. Feedback Intelligence is a synthetic demo. The seeded company “Avasara Demo Technologies” is synthetic and stays labeled that way.
 
@@ -84,7 +84,8 @@ Those credentials are for non-production databases only. A fictional demo organi
 
 ## Pages
 
-- `/` homepage
+- `/` Opportunity Intelligence landing until 16 November 2026, then the studio homepage
+- `/company` unlinked, noindex copy of the studio homepage while the product landing is public
 - `/services`
 - `/services/ai-agents`
 - `/services/generative-ai`

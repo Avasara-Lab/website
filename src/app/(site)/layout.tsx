@@ -1,17 +1,20 @@
 import { Suspense } from "react";
-import { SiteFooter } from "@/components/site-footer";
-import { SiteHeader } from "@/components/site-header";
+import { SiteFooterSwitch, SiteHeaderSwitch } from "@/components/site-chrome";
+import { marketingSiteIsVisible } from "@/lib/marketing-mode";
 
-export default function SiteLayout({ children }: { children: React.ReactNode }) {
+export default async function SiteLayout({ children }: { children: React.ReactNode }) {
+  const showMarketing = await marketingSiteIsVisible();
   return (
     <>
       <Suspense fallback={<div className="h-16 border-b border-line bg-background" />}>
-        <SiteHeader />
+        <SiteHeaderSwitch showMarketing={showMarketing} />
       </Suspense>
       <main id="content" className="flex-1">
         {children}
       </main>
-      <SiteFooter />
+      <Suspense fallback={null}>
+        <SiteFooterSwitch showMarketing={showMarketing} />
+      </Suspense>
     </>
   );
 }

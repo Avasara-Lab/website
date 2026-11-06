@@ -2,8 +2,9 @@
 
 import { createAuthClient } from "better-auth/react";
 import { LogOut } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
+import { safeNextPath } from "@/lib/safe-next";
 import { META_MODELS } from "@/server/modules/meta-ai/catalog";
 import { controlClass, dangerButtonClass, Notice, primaryButtonClass, secondaryButtonClass } from "@/components/app/ui";
 
@@ -47,6 +48,7 @@ function Success({ text }: { text: string | null }) {
 
 export function AuthForm({ mode }: { mode: "login" | "register" }) {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
 
@@ -66,7 +68,7 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
       setError(result.error.message || "Authentication failed.");
       return;
     }
-    router.push("/app");
+    router.push(mode === "login" ? safeNextPath(searchParams.get("next")) : "/app");
     router.refresh();
   }
 
